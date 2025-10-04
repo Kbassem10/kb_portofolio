@@ -1,0 +1,1 @@
+My personal portofolio page mainly built using AI tools and Next.js framework.
