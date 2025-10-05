@@ -46,7 +46,9 @@ export const metadata: Metadata = {
     description: "Software developer specializing in Python web frameworks and full-stack development.",
     creator: "@kbassem10",
   },
-  generator: "v0.app",
+  verification: {
+    google: "5VWhaKmsV5Wzrdko3_Si5vVnmNsMDttsJFA04mFxrsE",
+  },
 }
 
 export default function RootLayout({
