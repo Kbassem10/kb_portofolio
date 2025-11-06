@@ -1,8 +1,8 @@
 export const portfolioData = {
   personalInfo: {
     name: "Karim Bassem Joseph",
-    title: "Software Developer & Founder of Imhotep Tech",
-    bio: "Software developer specializing in Python web frameworks and full-stack development. A Computer Science student at Nile University with expertise in creating efficient, scalable applications for businesses of all sizes. Founder of Imhotep Tech, focused on delivering accessible technology solutions through custom software, APIs, and libraries that solve real business challenges.",
+    title: "Software Developer • Founder of Imhotep Tech",
+    bio: "Full‑stack developer focused on turning ideas into fast, reliable products. I build clean Python backends (Django/Flask) and modern React frontends that are accessible, performant, and a joy to use. Computer Science student at Nile University and founder of Imhotep Tech, where I ship custom software, APIs, and libraries that solve real business problems.",
     location: "Cairo, Egypt",
     email: "k.bassem2397@nu.edu.eg",
   },
@@ -63,6 +63,38 @@ export const portfolioData = {
       technologies: ["React", "Custom API", "Real-time Rates"],
       liveUrl: "https://imhotepcc.vercel.app/",
       githubUrl: "https://github.com/Imhotep-Tech/ImhotepCurrency",
+    },
+    {
+      title: "Imhotep Tasks",
+      description:
+        "Cross‑platform Todo app built with Django, deployable as PWA and desktop (Electron) with a clean, responsive UI.",
+      technologies: ["Django", "PWA", "Electron"],
+      liveUrl: "https://imhotep-tasks.vercel.app/",
+      githubUrl: "https://github.com/Imhotep-Tech/imhotep_tasks",
+    },
+    {
+      title: "Imhotep Skills",
+      description:
+        "Plan and track learning with AI‑powered insights, personalized skill plans, and progress tracking.",
+      technologies: ["Flask", "AI", "Learning"],
+      liveUrl: "https://imhotepskills.pythonanywhere.com/",
+      githubUrl: undefined,
+    },
+    {
+      title: "Imhotep Clinic",
+      description:
+        "Custom Flask web app for clinics: manage patients, appointments, pricing, and role‑based access securely.",
+      technologies: ["Flask", "RBAC", "Healthcare"],
+      liveUrl: "https://www.fiverr.com/kbassem/a-webapp-for-a-small-clinic",
+      githubUrl: undefined,
+    },
+    {
+      title: "The First Program",
+      description:
+        "Early Flask clinic app to manage patient data and doctor operations — the project that started it all.",
+      technologies: ["Flask", "Clinic"],
+      liveUrl: "https://kbassem.pythonanywhere.com/login",
+      githubUrl: undefined,
     },
   ],
   packages: [

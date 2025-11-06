@@ -65,7 +65,7 @@ export function ContactSection() {
 
           <div className="mt-20 pt-8 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} {portfolioData.personalInfo.name}. Built with Next.js & Framer Motion.
+              © {new Date().getFullYear()} {portfolioData.personalInfo.name}.
             </p>
           </div>
         </motion.div>

@@ -17,7 +17,7 @@ export function AboutSection() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-8 font-mono">About</h2>
+          <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-8 font-mono">About Me</h2>
 
           <p className="text-lg md:text-xl leading-relaxed text-foreground/90 max-w-3xl text-pretty">
             {portfolioData.personalInfo.bio}

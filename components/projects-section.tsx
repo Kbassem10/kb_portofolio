@@ -19,7 +19,7 @@ export function ProjectsSection() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-12 font-mono">Featured Projects</h2>
+          <h2 className="text-sm uppercase tracking-wider text-muted-foreground mb-12 font-mono">Projects That Ship</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {portfolioData.projects.map((project, index) => (
