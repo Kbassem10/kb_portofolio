@@ -81,14 +81,6 @@ export const portfolioData = {
       githubUrl: undefined,
     },
     {
-      title: "Imhotep Clinic",
-      description:
-        "Custom Flask web app for clinics: manage patients, appointments, pricing, and role‑based access securely.",
-      technologies: ["Flask", "RBAC", "Healthcare"],
-      liveUrl: "https://www.fiverr.com/kbassem/a-webapp-for-a-small-clinic",
-      githubUrl: undefined,
-    },
-    {
       title: "The First Program",
       description:
         "Early Flask clinic app to manage patient data and doctor operations — the project that started it all.",
