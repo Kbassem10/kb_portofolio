@@ -17,6 +17,23 @@ export const portfolioData = {
   },
   projects: [
     {
+      title: "Loyalty Program — Full-Stack Web Application",
+      description:
+        "Full-stack loyalty platform for a multi-branch car services company in Egypt, built with Django REST Framework and React 19. Powers QR-based point redemption with short-lived codes, automated invoice imports into PostgreSQL, and a bilingual (Arabic/English) PWA experience now used by 550+ active users.",
+      technologies: [
+        "Django REST Framework",
+        "React 19",
+        "Tailwind CSS",
+        "PostgreSQL",
+        "Docker",
+        "JWT Authentication",
+        "PWA",
+        "Playwright",
+      ],
+      liveUrl: "https://7csloyal.vercel.app/",
+      githubUrl: undefined,
+    },
+    {
       title: "Imhotep Financial Manager v7",
       description:
         "A full-stack finance manager built with Django and React, featuring smart category suggestions, advanced analytics, interactive dashboards, and automated transactions.",

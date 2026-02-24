@@ -60,15 +60,17 @@ export function ProjectsSection() {
                         <ExternalLink className="w-4 h-4" />
                         <span>Live Demo</span>
                       </a>
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Github className="w-4 h-4" />
-                        <span>Source</span>
-                      </a>
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Github className="w-4 h-4" />
+                          <span>Source</span>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </Card>
