@@ -7,9 +7,13 @@ import "./globals.css"
 import { Suspense } from "react"
 
 export const metadata: Metadata = {
-  title: "Karim Bassem Joseph | Software Developer Portfolio",
+  metadataBase: new URL("https://kbassem.vercel.app"),
+  title: {
+    default: "Karim Bassem Joseph — Software Developer & Founder of Imhotep Tech",
+    template: "%s · Karim Bassem",
+  },
   description:
-    "Karim Bassem Joseph is a software developer specializing in Python web frameworks and full-stack development. Computer Science student at Nile University and founder of Imhotep Tech, creating efficient, scalable applications and accessible technology solutions.",
+    "Karim Bassem Joseph is a full-stack software developer and founder of Imhotep Tech. He builds fast, accessible web apps with Django, React, and PostgreSQL — and ships products used by real people.",
   keywords: [
     "karim bassem",
     "karim bassem joseph",
@@ -18,9 +22,12 @@ export const metadata: Metadata = {
     "django",
     "flask",
     "react",
+    "next.js",
     "full-stack developer",
     "imhotep tech",
+    "imhoteptech",
     "nile university",
+    "cairo developer",
   ],
   authors: [{ name: "Karim Bassem Joseph" }],
   creator: "Karim Bassem Joseph",
@@ -35,15 +42,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Karim Bassem Joseph | Software Developer Portfolio",
+    url: "https://kbassem.vercel.app/",
+    title: "Karim Bassem Joseph — Software Developer & Founder of Imhotep Tech",
     description:
-      "Software developer specializing in Python web frameworks and full-stack development. Founder of Imhotep Tech.",
+      "Full-stack developer and founder of Imhotep Tech. I design, build, and ship software people actually use.",
     siteName: "Karim Bassem Joseph Portfolio",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Karim Bassem Joseph | Software Developer Portfolio",
-    description: "Software developer specializing in Python web frameworks and full-stack development.",
+    title: "Karim Bassem Joseph — Software Developer & Founder of Imhotep Tech",
+    description:
+      "Full-stack developer and founder of Imhotep Tech. I design, build, and ship software people actually use.",
     creator: "@kbassem10",
   },
   verification: {
