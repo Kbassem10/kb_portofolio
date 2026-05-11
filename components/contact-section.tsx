@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useState, useRef } from "react"
+import { motion } from "framer-motion"
+import { useState } from "react"
 import {
   Github,
   Linkedin,
@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
 } from "lucide-react"
 import { portfolioData } from "@/lib/portfolio-data"
+import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
 const socialIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   LinkedIn: Linkedin,
@@ -20,8 +21,7 @@ const socialIcons: Record<string, React.ComponentType<{ className?: string }>> =
 }
 
 export function ContactSection() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-10%" })
+  const { ref, inView } = useScrollReveal()
   const [copied, setCopied] = useState(false)
 
   const copyEmail = async () => {
@@ -58,9 +58,7 @@ export function ContactSection() {
             </h2>
 
             <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-              Whether you need a full-stack product, an API, or help moving an
-              idea from &ldquo;what if&rdquo; to &ldquo;it&apos;s live&rdquo; —
-              I&apos;m a short email away.
+              I&apos;m always up for a good project or a quick chat.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

@@ -1,9 +1,9 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 import { Monitor, Server, Database, Cpu } from "lucide-react"
 import { portfolioData } from "@/lib/portfolio-data"
+import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
 const groupIcons: Record<string, React.ReactNode> = {
   frontend: <Monitor className="h-4 w-4" />,
@@ -13,8 +13,7 @@ const groupIcons: Record<string, React.ReactNode> = {
 }
 
 export function SkillsSection() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-10%" })
+  const { ref, inView, containerVariants, itemVariants } = useScrollReveal()
 
   return (
     <section
@@ -22,20 +21,21 @@ export function SkillsSection() {
       ref={ref}
       className="relative px-4 py-20 md:px-6 md:py-28"
     >
-      <div className="mx-auto max-w-6xl">
+      <motion.div
+        className="mx-auto max-w-6xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+      >
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
+          variants={itemVariants}
           className="mb-4 font-mono text-sm uppercase tracking-wider text-muted-foreground"
         >
           ⟣ Toolkit
         </motion.p>
 
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
+          variants={itemVariants}
           className="text-balance text-3xl font-bold tracking-tight md:text-5xl"
         >
           What I reach for{" "}
@@ -43,22 +43,17 @@ export function SkillsSection() {
         </motion.h2>
 
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
+          variants={itemVariants}
           className="mt-4 max-w-2xl text-sm text-muted-foreground md:text-base"
         >
-          Grouped by what they actually do — so everyone, not just engineers,
-          can read the map.
+          The tools I use every day.
         </motion.p>
 
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {portfolioData.skillGroups.map((group, i) => (
+          {portfolioData.skillGroups.map((group) => (
             <motion.div
               key={group.id}
-              initial={{ opacity: 0, y: 24 }}
-              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-              transition={{ duration: 0.55, delay: 0.1 + i * 0.08 }}
+              variants={itemVariants}
               className="glass rounded-2xl p-6 md:p-7"
             >
               <div className="mb-3 flex items-center gap-2">
@@ -86,7 +81,7 @@ export function SkillsSection() {
             </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

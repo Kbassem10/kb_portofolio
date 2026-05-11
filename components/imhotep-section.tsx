@@ -1,13 +1,12 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 import { ArrowUpRight, Check } from "lucide-react"
 import { portfolioData } from "@/lib/portfolio-data"
+import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
 export function ImhotepSection() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-15%" })
+  const { ref, inView } = useScrollReveal("-15%")
   const it = portfolioData.imhotepTech
 
   return (

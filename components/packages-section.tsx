@@ -1,13 +1,12 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 import { ExternalLink, Github, Package } from "lucide-react"
 import { portfolioData } from "@/lib/portfolio-data"
+import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
 export function PackagesSection() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-10%" })
+  const { ref, inView, containerVariants, itemVariants } = useScrollReveal()
 
   return (
     <section
@@ -15,20 +14,21 @@ export function PackagesSection() {
       ref={ref}
       className="relative px-4 py-20 md:px-6 md:py-28"
     >
-      <div className="mx-auto max-w-6xl">
+      <motion.div
+        className="mx-auto max-w-6xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+      >
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
+          variants={itemVariants}
           className="mb-4 font-mono text-sm uppercase tracking-wider text-muted-foreground"
         >
           ⟣ Open Source
         </motion.p>
 
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
+          variants={itemVariants}
           className="text-balance text-3xl font-bold tracking-tight md:text-5xl"
         >
           Libraries &amp; APIs{" "}
@@ -36,23 +36,17 @@ export function PackagesSection() {
         </motion.h2>
 
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
+          variants={itemVariants}
           className="mt-4 max-w-2xl text-sm text-muted-foreground md:text-base"
         >
-          The reusable pieces I&apos;ve pulled out of my own projects and
-          published for the community. Free, maintained, and small enough to
-          actually read.
+          Tools I built, open for everyone.
         </motion.p>
 
         <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {portfolioData.packages.map((pkg, i) => (
+          {portfolioData.packages.map((pkg) => (
             <motion.article
               key={pkg.title}
-              initial={{ opacity: 0, y: 24 }}
-              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-              transition={{ duration: 0.5, delay: 0.1 + i * 0.1 }}
+              variants={itemVariants}
               className="group glass flex flex-col rounded-2xl p-6 transition-colors hover:border-accent/50"
             >
               <div className="mb-3 flex items-center gap-2">
@@ -108,7 +102,7 @@ export function PackagesSection() {
             </motion.article>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

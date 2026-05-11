@@ -1,16 +1,16 @@
 "use client"
 
-import { motion, useInView, AnimatePresence, LayoutGroup } from "framer-motion"
-import { useMemo, useRef, useState } from "react"
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
+import { useMemo, useState } from "react"
 import { ExternalLink, Github, Code2, Users, Sparkle } from "lucide-react"
 import { portfolioData, type Project, type ProjectCategory } from "@/lib/portfolio-data"
+import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
 const ALL_FILTER = "All" as const
 type Filter = typeof ALL_FILTER | ProjectCategory
 
 export function ProjectsSection() {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-10%" })
+  const { ref, inView, containerVariants, itemVariants } = useScrollReveal()
   const [filter, setFilter] = useState<Filter>(ALL_FILTER)
   const [detailMode, setDetailMode] = useState<"plain" | "technical">("plain")
 
@@ -34,20 +34,21 @@ export function ProjectsSection() {
       ref={ref}
       className="relative px-4 py-20 md:px-6 md:py-28"
     >
-      <div className="mx-auto max-w-6xl">
+      <motion.div
+        className="mx-auto max-w-6xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+      >
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
+          variants={itemVariants}
           className="mb-4 font-mono text-sm uppercase tracking-wider text-muted-foreground"
         >
           ⟣ Selected Work
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.05 }}
+          variants={itemVariants}
           className="flex flex-wrap items-end justify-between gap-6"
         >
           <div>
@@ -56,8 +57,7 @@ export function ProjectsSection() {
               <span className="text-gradient-accent">ship.</span>
             </h2>
             <p className="mt-3 max-w-2xl text-sm text-muted-foreground md:text-base">
-              Real products — not demos. Flip between a plain-English summary
-              and the technical breakdown, or filter by type.
+              Real products, real users.
             </p>
           </div>
 
@@ -84,9 +84,7 @@ export function ProjectsSection() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
+          variants={itemVariants}
           className="mt-8 flex flex-wrap gap-2"
         >
           <LayoutGroup id="project-filters">
@@ -134,7 +132,7 @@ export function ProjectsSection() {
             ))}
           </AnimatePresence>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   )
 }

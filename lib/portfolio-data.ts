@@ -210,21 +210,15 @@ export const portfolioData = {
     shortName: "KB",
     role: "Software Developer",
     title: "Software Developer • Founder of Imhotep Tech",
-    tagline: "I build software that businesses actually use.",
-    bio: "Full-stack developer focused on turning ideas into fast, reliable products. I write clean Python backends (Django / Flask) and modern React frontends that are accessible, performant, and a pleasure to use. I use AI as a force multiplier — not a shortcut — to compress weeks of engineering into days while keeping every line reviewed, secure, and maintainable. Computer Science student at Nile University and founder of Imhotep Tech, where I ship custom software, APIs, and libraries that solve real business problems.",
+    tagline: "I build things people actually use.",
+    bio: "CS student at Nile University, founder of Imhotep Tech. I design and build full-stack web apps — from database to pixels — and I care about shipping things people actually use.",
     location: "Cairo, Egypt",
     timezone: "Africa/Cairo",
     email: "karimbassemj@gmail.com",
     resumeUrl: undefined as string | undefined,
     availableForWork: true,
   },
-  /** Short, value-first lines a hiring manager can scan in 5 seconds. */
-  valueProps: [
-    "Ships full-stack products end-to-end — backend, frontend, and deploy.",
-    "Turns ambiguous business problems into clean, maintainable software.",
-    "AI-accelerated, not vibe-coded — weeks of work in days, fully reviewed.",
-    "Comfortable with Python, Django, React, PostgreSQL, and Docker.",
-  ],
+
   /** Used by the animated hero word rotator. */
   roles: [
     "Software Developer",
@@ -257,14 +251,14 @@ export const portfolioData = {
   imhotepTech: {
     name: "Imhotep Tech",
     url: "https://imhoteptech.vercel.app/",
-    tagline: "A software studio building products and tools used every day.",
+    tagline: "Custom software, APIs, and open-source tools.",
     description:
-      "Imhotep Tech is the software studio I founded to design, build, and ship custom web applications, APIs, and open-source libraries. From loyalty platforms and clinic management to AI-powered productivity tools, Imhotep Tech turns ideas into real products that businesses and people actually use.",
+      "My software studio — I build custom web apps, APIs, and open-source tools here.",
     highlights: [
-      "Full-stack web & PWA development",
-      "Custom APIs, integrations & automation",
-      "Open-source Python libraries",
-      "Design, build, deploy — end-to-end",
+      "Web apps & PWAs",
+      "APIs & automation",
+      "Open-source libraries",
+      "End-to-end delivery",
     ],
   },
   socialLinks: [

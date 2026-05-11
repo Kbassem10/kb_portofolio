@@ -58,7 +58,7 @@ export function HeroSection() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
           </span>
           {portfolioData.personalInfo.availableForWork
-            ? "Available for work & collaborations"
+            ? "Available for work"
             : "Currently shipping — let's talk soon"}
         </motion.div>
 
@@ -115,8 +115,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.32 }}
         >
-          I design, build, and ship full-stack web applications — from the database up
-          to the pixels. Founder of{" "}
+          Full-stack developer, CS student at Nile University, and founder of{" "}
           <a
             href={portfolioData.imhotepTech.url}
             target="_blank"
@@ -126,8 +125,7 @@ export function HeroSection() {
             Imhotep Tech
             <ArrowUpRight className="inline h-3.5 w-3.5" />
           </a>
-          , Computer Science student at Nile University, and the person behind
-          10+ shipped projects used by hundreds of people.
+          . 10+ shipped projects, hundreds of real users.
         </motion.p>
 
         <motion.div
@@ -161,27 +159,11 @@ export function HeroSection() {
           </a>
         </motion.div>
 
-        <motion.ul
-          className="mt-10 flex flex-wrap gap-2 text-xs"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.56 }}
-        >
-          {portfolioData.valueProps.map((vp) => (
-            <li
-              key={vp}
-              className="rounded-full border border-border/60 bg-muted/30 px-3 py-1 font-mono text-muted-foreground"
-            >
-              {vp}
-            </li>
-          ))}
-        </motion.ul>
-
         <motion.div
           className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
+          transition={{ duration: 0.6, delay: 0.56 }}
         >
           <span className="inline-flex items-center gap-1.5 font-mono">
             <MapPin className="h-3.5 w-3.5" />
@@ -193,9 +175,6 @@ export function HeroSection() {
               <span className="text-foreground/80">{localTime}</span>
             </span>
           )}
-          <span className="font-mono">
-            Ⓒ Imhotep Tech &middot; est. by the founder
-          </span>
         </motion.div>
       </div>
 
