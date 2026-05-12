@@ -1,16 +1,13 @@
 import { ImageResponse } from "next/og"
 
-export const runtime = "edge"
+// `next/og` on Edge often exceeds Vercel's 1 MB Edge bundle cap; Node serverless does not.
+export const runtime = "nodejs"
 
 // 1200x630 recommended for OG
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-export default async function Image() {
-  const fontData = await fetch(
-    new URL("../public/KBLogo.png", import.meta.url)
-  ).then((res) => res.arrayBuffer()).catch(() => null)
-
+export default function Image() {
   return new ImageResponse(
     (
       <div
