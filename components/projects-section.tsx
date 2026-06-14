@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { useMemo, useState } from "react"
-import { ExternalLink, Github, Code2, Users, Sparkle } from "lucide-react"
+import { ExternalLink, Github, Code2, Users, Sparkle, Smartphone } from "lucide-react"
 import { portfolioData, type Project, type ProjectCategory } from "@/lib/portfolio-data"
 import { useScrollReveal } from "@/lib/use-scroll-reveal"
 
@@ -254,6 +254,17 @@ function ProjectCard({
           >
             <ExternalLink className="h-4 w-4" />
             Live
+          </a>
+        )}
+        {project.playStoreUrl && (
+          <a
+            href={project.playStoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Smartphone className="h-4 w-4" />
+            App
           </a>
         )}
         {project.githubUrl && (

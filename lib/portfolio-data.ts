@@ -1,5 +1,6 @@
 export type ProjectCategory =
   | "Web App"
+  | "Web & Mobile App"
   | "AI / ML"
   | "Business Tool"
   | "PWA"
@@ -18,6 +19,7 @@ export type Project = {
   category: ProjectCategory
   liveUrl?: string
   githubUrl?: string
+  playStoreUrl?: string
   /** Optional concrete outcome (e.g., "550+ active users"). */
   impact?: string
   featured?: boolean
@@ -64,13 +66,14 @@ const projects: Project[] = [
     title: "Imhotep Financial Manager",
     tagline: "A personal-finance app that actually shows you where the money went.",
     plainDescription:
-      "A full-stack finance manager with smart category suggestions, interactive dashboards, and automated recurring transactions — built so that anyone, not just accountants, can understand their money.",
+      "A full-stack finance manager with an Android app, iOS-like web UI, smart category suggestions, and automated recurring transactions. Built so that anyone, not just accountants, can understand their money.",
     technicalDescription:
-      "Django + React application with PostgreSQL storage, Dockerized deploys, advanced analytics widgets, and automated scheduled transactions. Designed as a long-term product flagship of Imhotep Tech.",
-    technologies: ["Django", "React", "Tailwind CSS", "PostgreSQL", "Docker"],
-    category: "Web App",
+      "A powerful ecosystem featuring a Domain-Driven Design Django backend, React web frontend, and React Native mobile app. Includes PostgreSQL storage, Dockerized deploys, automated scheduled transactions, and native-like routing for Apple users.",
+    technologies: ["Django", "React", "React Native", "Tailwind CSS", "PostgreSQL", "Docker"],
+    category: "Web & Mobile App",
     liveUrl: "https://imhotep-finance.vercel.app/",
     githubUrl: "https://github.com/Imhotep-Tech/imhotep_finance",
+    playStoreUrl: "https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance",
     featured: true,
   },
   {
