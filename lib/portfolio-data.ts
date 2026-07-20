@@ -20,7 +20,7 @@ export type Project = {
   liveUrl?: string
   githubUrl?: string
   playStoreUrl?: string
-  /** Optional concrete outcome (e.g., "550+ active users"). */
+  /** Optional concrete outcome (e.g., "650+ active users"). */
   impact?: string
   featured?: boolean
 }
@@ -42,7 +42,7 @@ const projects: Project[] = [
   {
     title: "Loyalty Program Platform",
     tagline:
-      "Turned a car-services chain's paper loyalty cards into a bilingual app used by 550+ customers.",
+      "Turned a car-services chain's paper loyalty cards into a bilingual app used by 650+ customers.",
     plainDescription:
       "A full-stack loyalty app for a multi-branch car-services company in Egypt. Customers earn and redeem points by scanning a QR code on their phone — works in both Arabic and English, and installs like a real app (PWA).",
     technicalDescription:
@@ -59,7 +59,7 @@ const projects: Project[] = [
     ],
     category: "Business Tool",
     liveUrl: "https://7csloyal.vercel.app/",
-    impact: "550+ active users across multiple branches",
+    impact: "650+ active users across multiple branches",
     featured: true,
   },
   {

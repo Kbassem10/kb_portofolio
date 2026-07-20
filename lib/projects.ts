@@ -20,11 +20,24 @@ export const PROJECTS: Project[] = [
     featured: true,
   },
   {
-    title: "Dasta",
-    description: "A social party game bringing people together.",
-    tags: ["React Native"],
-    githubUrl: "https://github.com/Imhotep-Tech/dasta",
-    liveUrl: "https://dasta-games.vercel.app/",
+    title: "Loyalty Program Platform",
+    description: "Turned a car-services chain's paper loyalty cards into a bilingual app used by 650+ customers.",
+    tags: ["Django REST", "React", "PWA", "PostgreSQL"],
+    liveUrl: "https://7csloyal.vercel.app/",
+    featured: true,
+  },
+  {
+    title: "6G Quantum Optimization",
+    description: "A tool built for Orange Labs in France to run quantum optimizations for RAN problems, designed to be easy to use for non-technical people.",
+    tags: ["Qiskit", "Python"],
+    featured: true,
+  },
+  {
+    title: "Dastet al3ab",
+    description: "An open-source, bilingual party games platform with a Git-backed CMS. Create, play, and share offline-ready multiplayer games seamlessly! ",
+    tags: ["React", "Next.js"],
+    githubUrl: "https://github.com/Imhotep-Tech/dastet-al3ab",
+    liveUrl: "https://dastet-al3ab.vercel.app/",
     featured: true,
   },
   {
@@ -34,32 +47,21 @@ export const PROJECTS: Project[] = [
     githubUrl: "https://github.com/kbassem10/dj-scaffold",
     featured: true,
   },
-  {
-    title: "6G Quantum Optimization",
-    description: "Research applying Quantum Computing (QAOA/VQE) to optimize 6G cellular networks.",
-    tags: ["Qiskit", "Python"],
-    githubUrl: "https://github.com/kbassem10/6G-Quantum-Optimization",
-    featured: true,
-  },
+
   {
     title: "Enterprise ERP Development",
     description: "Custom module development and workflow integration across Odoo (via professional internship) and ERPNext.",
     tags: ["Python", "Odoo", "ERPNext"],
     featured: true,
   },
-  {
-    title: "Python Automation",
-    description: "A collection of robust scripts designed to automate repetitive tasks and streamline data processing.",
-    tags: ["Python", "Automation"],
-    featured: true,
-  },
+
 
   // 2. Past Projects
+
   {
-    title: "Loyalty Program Platform",
-    description: "Turned a car-services chain's paper loyalty cards into a bilingual app used by 550+ customers.",
-    tags: ["Django REST", "React", "PWA", "PostgreSQL"],
-    liveUrl: "https://7csloyal.vercel.app/",
+    title: "Greek Community Renting System",
+    description: "A comprehensive renting system built specifically for the Greek community in Egypt.",
+    tags: ["Web App", "Rental Management"],
     featured: false,
   },
   {
@@ -79,11 +81,11 @@ export const PROJECTS: Project[] = [
     featured: false,
   },
   {
-    title: "Imhotep Smart Clinic",
-    description: "Practice management system with digital records, scheduling, and printable prescriptions.",
-    tags: ["Django", "Tailwind CSS", "PostgreSQL", "PWA"],
-    githubUrl: "https://github.com/Imhotep-Tech/imhotep_smart_clinic",
-    liveUrl: "https://imhotepsmartclinic.pythonanywhere.com/",
+    title: "Imhotep Currency Converter",
+    description: "Daily-updated exchange rates API and clean React converter dashboard.",
+    tags: ["React", "REST API", "Real-time Rates"],
+    githubUrl: "https://github.com/Imhotep-Tech/ImhotepCurrency",
+    liveUrl: "https://imhotepcc.vercel.app/",
     featured: false,
   },
   {
@@ -95,11 +97,11 @@ export const PROJECTS: Project[] = [
     featured: false,
   },
   {
-    title: "Imhotep Currency Converter",
-    description: "Daily-updated exchange rates API and clean React converter dashboard.",
-    tags: ["React", "REST API", "Real-time Rates"],
-    githubUrl: "https://github.com/Imhotep-Tech/ImhotepCurrency",
-    liveUrl: "https://imhotepcc.vercel.app/",
+    title: "Imhotep Smart Clinic",
+    description: "Practice management system with digital records, scheduling, and printable prescriptions.",
+    tags: ["Django", "Tailwind CSS", "PostgreSQL", "PWA"],
+    githubUrl: "https://github.com/Imhotep-Tech/imhotep_smart_clinic",
+    liveUrl: "https://imhotepsmartclinic.pythonanywhere.com/",
     featured: false,
   },
   {
@@ -115,6 +117,30 @@ export const PROJECTS: Project[] = [
     description: "AI study guide and educational roadmap planner based on user topic input.",
     tags: ["Flask", "AI", "Learning"],
     liveUrl: "https://imhotepskills.pythonanywhere.com/",
+    featured: false,
+  },
+  {
+    title: "Imhotep Exchange Rates API",
+    description: "This API is simply a currency conversion API with unlimited requests, free to use, and updates every 24 hours.",
+    tags: ["REST API", "Currency", "Exchange Rates", "Free"],
+    githubUrl: "https://github.com/Imhotep-Tech/imhotep_currency_rates_api",
+    liveUrl: "https://imhotepexchangeratesapi.pythonanywhere.com/",
+    featured: false,
+  },
+  {
+    title: "Imhotep Mail",
+    description: "This is a simple Python library for sending emails. It provides an easy way to configure and send emails from any Python code.",
+    tags: ["Python", "Email", "SMTP", "Communication"],
+    githubUrl: "https://github.com/Imhotep-Tech/imhotep_mail",
+    liveUrl: "https://pypi.org/project/imhotep-mail/",
+    featured: false,
+  },
+  {
+    title: "Imhotep Files Flask",
+    description: "This Python library simplifies file upload and deletion operations in web applications using Flask or similar frameworks.",
+    tags: ["Python", "Flask", "File Upload", "Web Framework"],
+    githubUrl: "https://github.com/Imhotep-Tech/imhotep_files_flask",
+    liveUrl: "https://pypi.org/project/imhotep-files-flask/",
     featured: false,
   },
   {
