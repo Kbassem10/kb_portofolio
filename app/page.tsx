@@ -19,6 +19,8 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
+  Menu,
+  X,
 } from "lucide-react"
 import { PROJECTS } from "@/lib/projects"
 
@@ -56,6 +58,7 @@ function ThemeToggle() {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -72,13 +75,13 @@ export default function Home() {
       </div>
 
       {/* Sticky Glass Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 dark:border-white/10 bg-slate-50/80 dark:bg-[#080C14]/80 backdrop-blur-xl transition-all duration-200">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 dark:border-white/10 bg-slate-50/85 dark:bg-[#080C14]/85 backdrop-blur-xl transition-all duration-200">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between">
           <a
             href="#"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1"
+            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1"
           >
-            <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-slate-300/60 dark:border-white/15 shadow-sm group-hover:scale-105 transition-transform duration-200">
+            <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-slate-300/60 dark:border-white/15 shadow-sm group-hover:scale-105 transition-transform duration-200 shrink-0">
               <Image
                 src="/KBLogo.png"
                 alt="KB Logo"
@@ -88,38 +91,39 @@ export default function Home() {
                 className="object-cover"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-sm text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                 Karim Bassem
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
                 Software Developer
               </span>
             </div>
           </a>
 
-          <nav className="flex items-center gap-1.5 sm:gap-3">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-2">
             <a
               href="#work"
-              className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
             >
               Work
             </a>
             <a
               href="#projects"
-              className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
             >
               All Projects
             </a>
             <a
               href="#facts"
-              className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
             >
               Facts
             </a>
             <a
               href="#contact"
-              className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
             >
               Contact
             </a>
@@ -127,7 +131,57 @@ export default function Home() {
               <ThemeToggle />
             </div>
           </nav>
+
+          {/* Mobile Navigation Controls */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Glass Menu */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden border-t border-slate-200/60 dark:border-white/10 bg-slate-50/95 dark:bg-[#080C14]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+            <a
+              href="#work"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+            >
+              <span>Featured Work</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+            <a
+              href="#projects"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+            >
+              <span>All Projects & Packages</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+            <a
+              href="#facts"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+            >
+              <span>Facts & Tech Stack</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+            <a
+              href="#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+            >
+              <span>Contact</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+          </nav>
+        )}
       </header>
 
       <main className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 pt-8 pb-20 space-y-16">
