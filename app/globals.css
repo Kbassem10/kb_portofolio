@@ -16,7 +16,7 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.78 0.14 76);
+  --accent: oklch(0.65 0.2 260);
   --accent-foreground: oklch(0.145 0 0);
   --accent-2: oklch(0.7 0.15 240);
   --destructive: oklch(0.577 0.245 27.325);
@@ -40,11 +40,11 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.24 0.01 260);
   --muted-foreground: oklch(0.72 0 0);
-  /* Warm amber/gold — a subtle nod to Imhotep without being literal. */
-  --accent: oklch(0.82 0.15 78);
-  --accent-foreground: oklch(0.18 0.02 80);
-  /* Complementary cool blue for technical highlights. */
-  --accent-2: oklch(0.72 0.15 240);
+  /* Modern cool blue/indigo technical accent */
+  --accent: oklch(0.72 0.18 250);
+  --accent-foreground: oklch(0.985 0 0);
+  /* Complementary cyan blue for highlights */
+  --accent-2: oklch(0.75 0.15 210);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.3 0.01 260);
@@ -183,25 +183,7 @@
     );
   }
 
-  /* Hover shine (used on featured cards) */
-  .shine::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      110deg,
-      transparent 30%,
-      color-mix(in oklab, var(--accent) 18%, transparent) 50%,
-      transparent 70%
-    );
-    transform: translateX(-120%);
-    transition: transform 0.9s ease;
-    pointer-events: none;
-  }
-  .shine:hover::after {
-    transform: translateX(120%);
-  }
+
 
   /* Animated gradient border */
   .gradient-border {
@@ -257,4 +239,19 @@
   .dot-pulse {
     animation: dot-pulse 2.2s ease-out infinite;
   }
+
+  /* Bento Card Surface */
+  .bento-card {
+    background-color: color-mix(in oklab, var(--card) 65%, transparent);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bento-card:hover {
+    border-color: color-mix(in oklab, var(--accent) 50%, var(--border));
+    box-shadow: 0 12px 30px -10px color-mix(in oklab, var(--accent) 12%, transparent);
+  }
 }
+
