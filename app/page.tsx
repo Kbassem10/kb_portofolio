@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useTheme } from "next-themes"
 import Image from "next/image"
 import {
@@ -21,8 +21,12 @@ import {
   CheckCircle2,
   Menu,
   X,
+  Search,
+  Filter,
+  Package as PackageIcon,
+  Twitter,
 } from "lucide-react"
-import { PROJECTS } from "@/lib/projects"
+import { PROJECTS, type Project } from "@/lib/projects"
 
 // Theme Toggle Component with 44px min touch target
 function ThemeToggle() {
@@ -35,7 +39,7 @@ function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-11 h-11 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 animate-pulse border border-slate-300/40 dark:border-white/10" />
+      <div className="w-10 h-10 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 animate-pulse border border-slate-300/40 dark:border-white/10" />
     )
   }
 
@@ -44,13 +48,13 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
       aria-label="Toggle light and dark theme"
     >
       {isDark ? (
-        <Sun className="h-5 w-5 text-sky-400 transition-transform duration-300 rotate-0 hover:rotate-45" />
+        <Sun className="h-4.5 w-4.5 text-sky-400 transition-transform duration-300 rotate-0 hover:rotate-45" />
       ) : (
-        <Moon className="h-5 w-5 text-indigo-600 transition-transform duration-300 rotate-0 hover:-rotate-12" />
+        <Moon className="h-4.5 w-4.5 text-indigo-600 transition-transform duration-300 rotate-0 hover:-rotate-12" />
       )}
     </button>
   )
@@ -59,40 +63,95 @@ function ThemeToggle() {
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [activeSection, setActiveSection] = useState<string>("hero")
 
   useEffect(() => {
     setMounted(true)
+
+    const handleScroll = () => {
+      const sections = ["work", "projects", "facts", "contact"]
+      const scrollPosition = window.scrollY + 200
+
+      for (const section of sections) {
+        const element = document.getElementById(section)
+        if (element) {
+          const top = element.offsetTop
+          const height = element.offsetHeight
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            setActiveSection(section)
+            return
+          }
+        }
+      }
+      if (window.scrollY < 300) {
+        setActiveSection("hero")
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const featuredProjects = PROJECTS.filter((p) => p.featured)
-  const pastProjects = PROJECTS.filter((p) => !p.featured)
+  const featuredProjects = useMemo(() => PROJECTS.filter((p) => p.featured), [])
+  const pastProjects = useMemo(() => PROJECTS.filter((p) => !p.featured), [])
+
+  // Filter categories for the archive
+  const filteredArchive = useMemo(() => {
+    return pastProjects.filter((project) => {
+      const matchesSearch =
+        searchQuery.trim() === "" ||
+        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      if (!matchesSearch) return false
+
+      if (selectedCategory === "all") return true
+      if (selectedCategory === "web") {
+        return project.tags.some((t) =>
+          ["Django", "React", "Next.js", "Web App", "Rental Management", "Flask"].includes(t)
+        )
+      }
+      if (selectedCategory === "ai") {
+        return (
+          project.tags.some((t) =>
+            ["AI", "Gemini AI", "Minimax AI", "Learning"].includes(t)
+          ) || project.title.toLowerCase().includes("ai")
+        )
+      }
+      if (selectedCategory === "pwa") {
+        return project.tags.some((t) => ["PWA", "Electron"].includes(t))
+      }
+      if (selectedCategory === "packages") {
+        return project.tags.some((t) =>
+          ["Python", "REST API", "File Upload", "Email", "Currency", "Exchange Rates"].includes(t)
+        )
+      }
+      return true
+    })
+  }, [pastProjects, selectedCategory, searchQuery])
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#080C14] text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500/30 selection:text-indigo-900 dark:selection:text-indigo-200 transition-colors duration-300 relative overflow-x-hidden">
-      {/* Background Grid Pattern Only — Zero Light Streaks / Blurs */}
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#080C14] text-[#0F172A] dark:text-[#F8FAFC] font-sans selection:bg-indigo-500/20 selection:text-indigo-900 dark:selection:text-indigo-200 transition-colors duration-300 relative overflow-x-hidden">
+      {/* Background Subtle Grid */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-25 dark:opacity-15 mask-fade-edges" />
+        <div className="absolute inset-0 bg-grid opacity-30 dark:opacity-15 mask-fade-edges" />
       </div>
 
-      {/* Sticky Glass Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200/60 dark:border-white/10 bg-slate-50/85 dark:bg-[#080C14]/85 backdrop-blur-xl transition-all duration-200">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      {/* Sticky Glass Top Navigation Bar */}
+      <header className="sticky top-0 z-50 w-full border-b border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/85 dark:bg-[#080C14]/85 backdrop-blur-xl transition-all duration-200">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <a
             href="#"
-            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1"
+            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1"
           >
-            <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-slate-300/60 dark:border-white/15 shadow-sm group-hover:scale-105 transition-transform duration-200 shrink-0">
-              <Image
-                src="/KBLogo.png"
-                alt="KB Logo"
-                fill
-                priority
-                sizes="36px"
-                className="object-cover"
-              />
+            <div className="w-8 h-8 rounded-full bg-indigo-600/10 dark:bg-indigo-500/20 border border-indigo-600/20 dark:border-indigo-400/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-sm shadow-sm group-hover:scale-105 transition-transform shrink-0">
+              KB
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-sm text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+              <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                 Karim Bassem
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
@@ -102,28 +161,44 @@ export default function Home() {
           </a>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-6">
             <a
               href="#work"
-              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "work"
+                  ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/60 dark:hover:bg-white/5"
+              }`}
             >
               Work
             </a>
             <a
               href="#projects"
-              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "projects"
+                  ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/60 dark:hover:bg-white/5"
+              }`}
             >
               All Projects
             </a>
             <a
               href="#facts"
-              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "facts"
+                  ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/60 dark:hover:bg-white/5"
+              }`}
             >
               Facts
             </a>
             <a
               href="#contact"
-              className="px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all min-h-[44px] flex items-center"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "contact"
+                  ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50/60 dark:hover:bg-white/5"
+              }`}
             >
               Contact
             </a>
@@ -137,7 +212,7 @@ export default function Home() {
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -147,11 +222,11 @@ export default function Home() {
 
         {/* Mobile Dropdown Glass Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-slate-200/60 dark:border-white/10 bg-slate-50/95 dark:bg-[#080C14]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+          <nav className="md:hidden border-t border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/95 dark:bg-[#080C14]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-xl animate-in slide-in-from-top-2 duration-200">
             <a
               href="#work"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
             >
               <span>Featured Work</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
@@ -159,7 +234,7 @@ export default function Home() {
             <a
               href="#projects"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
             >
               <span>All Projects & Packages</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
@@ -167,15 +242,15 @@ export default function Home() {
             <a
               href="#facts"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
             >
-              <span>Facts & Tech Stack</span>
+              <span>Quick Facts & Tech Stack</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
             </a>
             <a
               href="#contact"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-slate-800/70 transition-all min-h-[48px] flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
             >
               <span>Contact</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
@@ -184,70 +259,57 @@ export default function Home() {
         )}
       </header>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 pt-8 pb-20 space-y-16">
-        {/* HERO SECTION — BENTO GRID ARCHETYPE */}
-        <section className="pt-4 sm:pt-8">
-          <div className="grid grid-cols-12 gap-5">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-8 pb-20 space-y-20">
+        {/* HERO SECTION — BENTO GRID (Stitch Screen 4) */}
+        <section className="pt-2 sm:pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             {/* Main Bio Bento Card */}
-            <div className="col-span-12 lg:col-span-8 bento-card rounded-3xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
-              <div className="space-y-6 relative z-10">
+            <div className="lg:col-span-8 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm relative overflow-hidden group">
+              <div className="space-y-6">
                 {/* Status Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                  <span className="relative flex h-2.5 w-2.5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-300 shadow-xs">
+                  <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
                   Available for contracts & software roles
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                  <div className="relative h-24 w-24 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-2xl border-2 border-indigo-500/40 dark:border-indigo-400/40 shadow-xl group-hover:scale-[1.03] transition-transform duration-300">
-                    <Image
-                      src="/kbassem.jpg"
-                      alt="Karim Bassem"
-                      fill
-                      priority
-                      sizes="112px"
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
-                      Hi, I'm Karim. <br className="hidden sm:inline" />
-                      <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 dark:from-indigo-400 dark:via-purple-300 dark:to-cyan-400 bg-clip-text text-transparent">
-                        I build software people actually use.
-                      </span>
-                    </h1>
-                    <p className="text-base sm:text-lg font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                      Software Developer, Founder of{" "}
-                      <a
-                        href="https://imhoteptech.vercel.app/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 dark:text-cyan-400 hover:underline underline-offset-4 font-semibold transition-colors inline-flex items-center gap-0.5"
-                      >
-                        Imhotep Tech
-                        <ArrowUpRight className="h-4 w-4" />
-                      </a>
-                      , and CS Student.
-                    </p>
-                  </div>
+                <div className="space-y-4">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-heading tracking-tight leading-[1.15] text-slate-900 dark:text-white">
+                    Hi, I'm Karim. <br />
+                    <span className="text-indigo-600 dark:text-indigo-400">
+                      I build software people actually use.
+                    </span>
+                  </h1>
+                  <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                    Software Developer, Founder of{" "}
+                    <a
+                      href="https://imhoteptech.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 dark:text-indigo-400 hover:underline underline-offset-4 font-semibold transition-colors inline-flex items-center gap-0.5"
+                    >
+                      Imhotep Tech
+                      <ArrowUpRight className="h-4 w-4" />
+                    </a>
+                    , and CS Student.
+                  </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3.5 mt-8 relative z-10">
+              <div className="flex flex-wrap items-center gap-3.5 mt-8 pt-4">
                 <a
                   href="#work"
-                  className="px-6 py-3.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:bg-indigo-700 dark:hover:bg-indigo-600 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out min-h-[44px] flex items-center justify-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Terminal className="h-4 w-4" />
                   View Featured Work
                 </a>
                 <a
                   href="#contact"
-                  className="px-6 py-3.5 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/80 dark:border-white/10 text-slate-800 dark:text-slate-200 font-bold text-sm hover:bg-slate-300/80 dark:hover:bg-slate-700/80 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out min-h-[44px] flex items-center justify-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-transparent border border-slate-300 dark:border-white/15 text-slate-800 dark:text-slate-200 font-semibold text-xs uppercase tracking-wider font-heading hover:bg-slate-100 dark:hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <Mail className="h-4 w-4" />
                   Contact Me
@@ -255,63 +317,63 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Quick Stats Bento Box */}
-            <div className="col-span-12 lg:col-span-4 grid grid-cols-2 lg:grid-cols-1 gap-4">
-              <div className="bento-card rounded-3xl p-5 flex flex-col justify-between group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Academics
-                  </span>
-                  <div className="p-2 rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400">
-                    <GraduationCap className="h-4.5 w-4.5" />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    3.96 <span className="text-sm font-semibold text-slate-500">GPA</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
-                    Nile Univ • Presidential Honors (4.0 GPA 2x)
-                  </p>
-                </div>
+            {/* Profile & Quick Stats Bento Column */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              {/* Profile Photo Card */}
+              <div className="bento-card rounded-2xl overflow-hidden shadow-sm aspect-square relative group">
+                <Image
+                  src="/kbassem.jpg"
+                  alt="Karim Bassem"
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              <div className="bento-card rounded-3xl p-5 flex flex-col justify-between group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Portfolio Track
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bento-card rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
+                    <GraduationCap className="h-4.5 w-4.5" />
+                  </div>
+                  <span className="text-2xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
+                    3.96
                   </span>
-                  <div className="p-2 rounded-xl bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                    GPA
+                  </span>
+                </div>
+
+                <div className="bento-card rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
                     <Layers className="h-4.5 w-4.5" />
                   </div>
-                </div>
-                <div className="mt-3">
-                  <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                    18+ <span className="text-sm font-semibold text-slate-500">Projects</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-1">
-                    Full-Stack Web, Mobile Apps, Open Source CLI & APIs
-                  </p>
+                  <span className="text-2xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
+                    {PROJECTS.length}+
+                  </span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                    Projects
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FEATURED WORK SECTION — BENTO GRID CARDS */}
+        {/* FEATURED WORK & SYSTEMS SECTION (`#work`) */}
         <section id="work" className="space-y-6 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
-                <Sparkles className="h-3.5 w-3.5" />
-                Featured Portfolio
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-1">
-                Featured Work & Systems
-              </h2>
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              <Sparkles className="h-3.5 w-3.5" />
+              Featured Portfolio
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-              Hand-crafted web, mobile, and quantum tools built for real impact
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+              Featured Work & Systems
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              Hand-crafted web, mobile, and quantum tools built for real impact.
             </p>
           </div>
 
@@ -319,14 +381,14 @@ export default function Home() {
             {featuredProjects.map((project) => (
               <div
                 key={project.title}
-                className="bento-card rounded-3xl p-6 flex flex-col justify-between relative group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out border border-slate-200/80 dark:border-white/10"
+                className="bento-card rounded-2xl p-6 flex flex-col justify-between group shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border border-slate-200/80 dark:border-white/10"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-cyan-400 transition-colors duration-200">
+                    <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {project.title}
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-300 border border-indigo-500/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-heading uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 shrink-0">
                       Featured
                     </span>
                   </div>
@@ -336,29 +398,26 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-4 mt-6 pt-4 border-t border-slate-200/60 dark:border-white/5">
-                  {/* Tag Badges */}
+                  {/* Tech Tags */}
                   <div className="flex flex-wrap gap-1.5">
                     {project.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-200/70 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-300/40 dark:border-white/10"
-                      >
+                      <span key={tag} className="tech-badge">
                         {tag}
                       </span>
                     ))}
                   </div>
 
-                  {/* Action Links with 44px min touch targets */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {/* Action Links */}
+                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
                     {project.githubUrl && (
                       <a
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-300/80 dark:hover:bg-slate-700 transition-all min-h-[44px] inline-flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-1.5 min-h-[38px]"
                         aria-label={`Source code for ${project.title}`}
                       >
-                        <Github className="h-4 w-4" />
+                        <Github className="h-3.5 w-3.5" />
                         Code
                       </a>
                     )}
@@ -367,10 +426,10 @@ export default function Home() {
                         href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2 rounded-xl bg-indigo-600/10 dark:bg-indigo-500/20 border border-indigo-500/30 text-xs font-bold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all min-h-[44px] inline-flex items-center gap-1.5"
-                        aria-label={`Live website for ${project.title}`}
+                        className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/40 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white transition-all flex items-center gap-1.5 min-h-[38px]"
+                        aria-label={`Live demo for ${project.title}`}
                       >
-                        <ArrowUpRight className="h-4 w-4" />
+                        <ArrowUpRight className="h-3.5 w-3.5" />
                         Live Demo
                       </a>
                     )}
@@ -379,12 +438,15 @@ export default function Home() {
                         href={project.playStoreUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:text-white transition-all min-h-[44px] inline-flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-1.5 min-h-[38px]"
                         aria-label={`Play Store app for ${project.title}`}
                       >
-                        <Smartphone className="h-4 w-4" />
+                        <Smartphone className="h-3.5 w-3.5" />
                         Play Store
                       </a>
+                    )}
+                    {!project.githubUrl && !project.liveUrl && !project.playStoreUrl && (
+                      <span className="text-xs text-slate-400 italic py-1">Internal Tool</span>
                     )}
                   </div>
                 </div>
@@ -393,35 +455,102 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ALL PAST & OPEN SOURCE PROJECTS SECTION */}
+        {/* ALL PROJECTS & LIBRARIES / ARCHIVE SECTION (`#projects`, Stitch Screen 2) */}
         <section id="projects" className="space-y-6 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-5">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
                 <Terminal className="h-3.5 w-3.5" />
                 Open Source & Packages
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-1">
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
                 More Projects & Libraries
               </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                100% complete archive of apps, Python libraries, and tools built across various stacks.
+              </p>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-              100% complete archive of apps, Python libraries, and tools
-            </p>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search archive..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pastProjects.map((project) => {
+          {/* Interactive Category Filter Pills */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <button
+              onClick={() => setSelectedCategory("all")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+                selectedCategory === "all"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+              }`}
+            >
+              All ({pastProjects.length})
+            </button>
+            <button
+              onClick={() => setSelectedCategory("web")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+                selectedCategory === "web"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+              }`}
+            >
+              Web Apps
+            </button>
+            <button
+              onClick={() => setSelectedCategory("ai")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+                selectedCategory === "ai"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+              }`}
+            >
+              AI / ML
+            </button>
+            <button
+              onClick={() => setSelectedCategory("pwa")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+                selectedCategory === "pwa"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+              }`}
+            >
+              PWAs & Tools
+            </button>
+            <button
+              onClick={() => setSelectedCategory("packages")}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+                selectedCategory === "packages"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+              }`}
+            >
+              APIs & Libraries
+            </button>
+          </div>
+
+          {/* Archive Project Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredArchive.map((project) => {
               const primaryLink = project.liveUrl || project.githubUrl
 
               return (
                 <div
                   key={project.title}
-                  className="bento-card rounded-2xl p-5 flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border border-slate-200/70 dark:border-white/10"
+                  className="bento-card rounded-2xl p-5 flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border border-slate-200/80 dark:border-white/10"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-cyan-400 transition-colors">
+                      <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {project.title}
                       </h3>
                       {primaryLink && (
@@ -429,33 +558,30 @@ export default function Home() {
                           href={primaryLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-cyan-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-all min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0"
+                          className="p-1 rounded-md text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-all shrink-0"
                           aria-label={`Open link for ${project.title}`}
                         >
                           <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </a>
                       )}
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed flex-grow">
                       {project.description}
                     </p>
                   </div>
 
-                  <div className="space-y-3 mt-4 pt-3 border-t border-slate-200/50 dark:border-white/5">
+                  <div className="space-y-3 mt-5 pt-3.5 border-t border-slate-200/60 dark:border-white/5">
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1.5">
                       {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-300/30 dark:border-white/5"
-                        >
+                        <span key={tag} className="tech-badge text-[11px] py-0.5 px-2">
                           {tag}
                         </span>
                       ))}
                     </div>
 
                     {/* Links */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400 pt-1">
                       {project.githubUrl && (
                         <a
                           href={project.githubUrl}
@@ -475,7 +601,9 @@ export default function Home() {
                           className="inline-flex items-center gap-1 hover:text-indigo-600 dark:hover:text-white transition-colors"
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
-                          {project.liveUrl.includes("pypi.org") ? "PyPI Package" : "Live Deployment"}
+                          {project.liveUrl.includes("pypi.org")
+                            ? "PyPI Package"
+                            : "Live Deployment"}
                         </a>
                       )}
                     </div>
@@ -484,102 +612,148 @@ export default function Home() {
               )
             })}
           </div>
+
+          {filteredArchive.length === 0 && (
+            <div className="text-center py-12 bento-card rounded-2xl">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                No projects matched your search criteria.
+              </p>
+            </div>
+          )}
         </section>
 
-        {/* QUICK FACTS & EXPERTISE SECTION */}
+        {/* QUICK FACTS & TECH STACK SECTION (`#facts`, Stitch Screen 3) */}
         <section id="facts" className="space-y-6 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-slate-200/80 dark:border-white/10 pb-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-cyan-400">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Background & Skills
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white mt-1">
-                Quick Facts & Tech Stack
-              </h2>
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Background & Skills
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-              Academic excellence, studio leadership, and end-to-end tooling
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+              Quick Facts & Tech Stack
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              Academic excellence, studio leadership, and end-to-end tooling.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Education Fact */}
-            <div className="bento-card rounded-3xl p-6 space-y-4 group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-              <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 w-fit">
-                <GraduationCap className="h-6 w-6" />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Education Card (4 cols) */}
+            <div className="md:col-span-4 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Education</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                  4th-Year Computer Science Student at <strong className="text-slate-900 dark:text-white">Nile University</strong>.
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 flex items-center justify-center mb-6">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white mb-2">
+                  Education
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                  4th-Year Computer Science Student at{" "}
+                  <strong className="text-slate-900 dark:text-white">Nile University</strong>.
                 </p>
-                <div className="mt-3 p-3 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 border border-slate-300/40 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 space-y-1">
-                  <div>• Cumulative GPA: <span className="text-indigo-600 dark:text-cyan-400 font-bold">3.96 / 4.00</span></div>
-                  <div>• Presidential Honors on 2 terms with <span className="text-indigo-600 dark:text-cyan-400 font-bold">4.0 GPA</span></div>
+              </div>
+
+              <div className="space-y-2.5 bg-slate-100/70 dark:bg-slate-900/70 p-4 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  <span>
+                    Cumulative GPA:{" "}
+                    <strong className="text-indigo-600 dark:text-indigo-400 font-bold">
+                      3.96 / 4.00
+                    </strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  <span>
+                    Presidential Honors on 2 terms with{" "}
+                    <strong className="text-indigo-600 dark:text-indigo-400 font-bold">4.0 GPA</strong>
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Studio Fact */}
-            <div className="bento-card rounded-3xl p-6 space-y-4 group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-              <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 w-fit">
-                <Rocket className="h-6 w-6" />
-              </div>
+            {/* Studio & Engineering Card (8 cols) */}
+            <div className="md:col-span-8 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Studio & Engineering</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 flex items-center justify-center mb-6">
+                  <Rocket className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white mb-2">
+                  Studio & Engineering
+                </h3>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 max-w-2xl">
                   Founder & Lead Developer at{" "}
                   <a
                     href="https://imhoteptech.vercel.app/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-indigo-600 dark:text-cyan-400 hover:underline font-bold"
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold"
                   >
                     Imhotep Tech
                   </a>
-                  . Building web platforms, cross-platform mobile apps, and open-source tools.
+                  . Building web platforms, cross-platform mobile apps, and open-source developer tools.
                 </p>
-                <div className="mt-3 p-3 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 border border-slate-300/40 dark:border-white/10 text-xs font-medium text-slate-700 dark:text-slate-300">
-                  Focus: High performance, clean architecture, accessible design, and real-world deployment.
-                </div>
+              </div>
+
+              <div className="bg-slate-100/70 dark:bg-slate-900/70 p-5 rounded-xl border-l-4 border-indigo-600 dark:border-indigo-400 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                <strong className="text-slate-900 dark:text-white font-bold">Focus:</strong> High
+                performance, clean domain architecture, accessible design, and real-world deployment.
               </div>
             </div>
 
-            {/* Full Tech Stack */}
-            <div className="bento-card rounded-3xl p-6 space-y-4 group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-              <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-400 w-fit">
-                <Code className="h-6 w-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Full Tech Stack</h3>
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {[
-                    "React Native", "Next.js", "React", "TypeScript", "Tailwind CSS", "PWA",
-                    "Django", "Django REST", "FastAPI", "Flask", "Python", "Qiskit",
-                    "PostgreSQL", "SQLite", "Docker", "Tailscale", "Git", "Playwright"
-                  ].map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-200/70 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-300/40 dark:border-white/10 hover:border-indigo-500/50 transition-colors"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+            {/* Full Tech Stack Card (12 cols) */}
+            <div className="md:col-span-12 bento-card rounded-2xl p-6 sm:p-8 shadow-sm group hover:scale-[1.005] transition-all duration-200">
+              <div className="flex items-center gap-3 mb-6 border-b border-slate-200/80 dark:border-white/10 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 flex items-center justify-center">
+                  <Code className="h-5 w-5" />
                 </div>
+                <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white">
+                  Full Tech Stack
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  "React Native",
+                  "Next.js",
+                  "React",
+                  "TypeScript",
+                  "Tailwind CSS",
+                  "PWA",
+                  "Django",
+                  "Django REST",
+                  "FastAPI",
+                  "Flask",
+                  "Python",
+                  "Qiskit",
+                  "PostgreSQL",
+                  "SQLite",
+                  "Docker",
+                  "Tailscale",
+                  "Git",
+                  "Playwright",
+                ].map((tech) => (
+                  <span
+                    key={tech}
+                    className="tech-badge text-xs px-3.5 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors"
+                  >
+                    {tech}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* FOOTER / CONTACT SECTION */}
+        {/* CTA & CONTACT SECTION (`#contact`) */}
         <section id="contact" className="scroll-mt-24">
-          <div className="bento-card rounded-3xl p-8 sm:p-12 relative overflow-hidden text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-8 border border-slate-200/80 dark:border-white/10">
-            <div className="space-y-2 max-w-xl">
-              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+          <div className="bento-card rounded-3xl p-8 sm:p-12 shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-8 border border-slate-200/80 dark:border-white/10">
+            <div className="space-y-2 max-w-xl text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
                 Let's build something extraordinary.
               </h2>
-              <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                 Available for contract engineering roles, technical advisory, and high-impact software projects.
               </p>
             </div>
@@ -589,7 +763,7 @@ export default function Home() {
                 href="https://github.com/kbassem10"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-slate-700 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-sm"
+                className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-xs"
                 aria-label="GitHub Profile"
               >
                 <Github className="h-5 w-5" />
@@ -598,27 +772,54 @@ export default function Home() {
                 href="https://www.linkedin.com/in/karimbassem"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-300 dark:hover:bg-slate-700 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-sm"
+                className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-xs"
                 aria-label="LinkedIn Profile"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
               <a
                 href="mailto:karimbassemj@gmail.com"
-                className="px-5 py-3 rounded-2xl bg-indigo-600 dark:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 hover:bg-indigo-700 dark:hover:bg-indigo-600 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center gap-2 min-h-[48px]"
+                className="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-indigo-500/20 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 flex items-center gap-2 min-h-[44px]"
                 aria-label="Email Karim Bassem"
               >
-                <Mail className="h-5 w-5" />
+                <Mail className="h-4 w-4" />
                 Get in Touch
               </a>
             </div>
           </div>
 
-          <div className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-            © {new Date().getFullYear()} Karim Bassem Joseph. Built with Next.js & Tailwind CSS. All rights reserved.
+          <div className="mt-12 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <a
+                href="https://github.com/kbassem10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-semibold"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://www.linkedin.com/in/karimbassem"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-semibold"
+              >
+                LinkedIn
+              </a>
+              <a
+                href="https://x.com/kbassem10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-semibold"
+              >
+                Twitter
+              </a>
+            </div>
+            <p>© {new Date().getFullYear()} Karim Bassem Joseph.</p>
           </div>
         </section>
       </main>
     </div>
   )
 }
+
