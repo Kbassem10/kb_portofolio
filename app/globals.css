@@ -5,26 +5,26 @@
 
 :root {
   --background: #f8fafc;
-  --foreground: #0f172a;
+  --foreground: #09111e;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #09111e;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #4f46e5;
+  --popover-foreground: #09111e;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --primary-container: #4f46e5;
-  --secondary: #565e74;
+  --primary-container: #1d4ed8;
+  --secondary: #475569;
   --secondary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #4f46e5;
+  --accent: #e11d48;
   --accent-foreground: #ffffff;
-  --accent-2: #818cf8;
-  --destructive: #ef4444;
+  --accent-2: #3b82f6;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #4f46e5;
+  --ring: #2563eb;
   --radius: 0.75rem;
 
   /* Stitch Tokens */
@@ -37,34 +37,34 @@
 }
 
 .dark {
-  --background: #080c14;
+  --background: #070b14;
   --foreground: #f8fafc;
-  --card: #0f172a;
+  --card: #0d1527;
   --card-foreground: #f8fafc;
-  --popover: #0f172a;
+  --popover: #0d1527;
   --popover-foreground: #f8fafc;
-  --primary: #6366f1;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --primary-container: #6366f1;
+  --primary-container: #2563eb;
   --secondary: #94a3b8;
   --secondary-foreground: #0f172a;
-  --muted: #1e293b;
+  --muted: #131d33;
   --muted-foreground: #94a3b8;
-  --accent: #6366f1;
+  --accent: #f43f5e;
   --accent-foreground: #ffffff;
-  --accent-2: #38bdf8;
+  --accent-2: #60a5fa;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #6366f1;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #3b82f6;
 
   /* Stitch Dark Tokens */
-  --surface-border: rgba(255, 255, 255, 0.1);
-  --surface-container-lowest: #0b0f19;
-  --surface-container-low: #111827;
-  --surface-container: #182234;
-  --surface-container-high: #1e293b;
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-container-lowest: #090e1a;
+  --surface-container-low: #0f172a;
+  --surface-container: #15223c;
+  --surface-container-high: #1c2b4c;
   --slate-gray: #94a3b8;
 }
 
@@ -115,12 +115,12 @@
     background-image:
       radial-gradient(
         1000px 600px at 85% -10%,
-        color-mix(in srgb, var(--primary) 6%, transparent),
+        color-mix(in srgb, var(--primary) 7%, transparent),
         transparent 60%
       ),
       radial-gradient(
         900px 500px at -10% 15%,
-        color-mix(in srgb, var(--accent-2) 6%, transparent),
+        color-mix(in srgb, var(--accent) 5%, transparent),
         transparent 60%
       );
     background-attachment: fixed;
@@ -219,7 +219,7 @@
   }
 
   .dark .bento-card {
-    background-color: rgba(15, 23, 42, 0.75);
+    background-color: rgba(13, 21, 39, 0.78);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);

@@ -253,7 +253,7 @@ export const portfolioData = {
   ],
   imhotepTech: {
     name: "Imhotep Tech",
-    url: "https://imhoteptech.vercel.app/",
+    url: "https://www.imhotep-tech.com/",
     tagline: "Custom software, APIs, and open-source tools.",
     description:
       "My software studio — I build custom web apps, APIs, and open-source tools here.",

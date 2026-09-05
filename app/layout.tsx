@@ -88,7 +88,7 @@ export default function RootLayout({
               worksFor: {
                 '@type': 'Organization',
                 name: 'Imhotep Tech',
-                url: 'https://imhoteptech.vercel.app/'
+                url: 'https://www.imhotep-tech.com/'
               }
             })
           }}
