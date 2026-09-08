@@ -15,7 +15,7 @@ export const PROJECTS: Project[] = [
     description: "A mobile app and web platform that simplifies personal finance.",
     tags: ["React Native"],
     githubUrl: "https://github.com/Imhotep-Tech/imhotep_finance",
-    liveUrl: "https://imhotep-finance.vercel.app/",
+    liveUrl: "https://finance.imhotep-tech.com/",
     playStoreUrl: "https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance",
     featured: true,
   },
@@ -23,7 +23,7 @@ export const PROJECTS: Project[] = [
     title: "Loyalty Program Platform",
     description: "Turned a car-services chain's paper loyalty cards into a bilingual app used by 650+ customers.",
     tags: ["Django REST", "React", "PWA", "PostgreSQL"],
-    liveUrl: "https://7csloyal.vercel.app/",
+    liveUrl: "https://loyalty.7-cylinders.com/",
     featured: true,
   },
   {
