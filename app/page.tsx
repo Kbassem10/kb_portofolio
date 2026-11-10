@@ -25,10 +25,23 @@ import {
   Filter,
   Package as PackageIcon,
   Twitter,
+  Clock,
+  MapPin,
+  Copy,
+  Check,
+  ChevronDown,
 } from "lucide-react"
-import { PROJECTS, type Project } from "@/lib/projects"
 
-// Theme Toggle Component with 44px min touch target
+import { portfolioData, type Project, type Package } from "@/lib/portfolio-data"
+import { FloatingBackground } from "@/components/antigravity/floating-background"
+import { RoleRotator } from "@/components/antigravity/role-rotator"
+import { TiltCard } from "@/components/antigravity/tilt-card"
+import { ProjectCard } from "@/components/antigravity/project-card"
+import { PackageCard } from "@/components/antigravity/package-card"
+import { SkillsMatrix } from "@/components/antigravity/skills-matrix"
+import { StudioCard } from "@/components/antigravity/studio-card"
+
+// Theme Toggle Component with 44px minimum touch target
 function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -48,7 +61,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       aria-label="Toggle light and dark theme"
     >
       {isDark ? (
@@ -60,19 +73,48 @@ function ThemeToggle() {
   )
 }
 
+// Live Cairo Time Hook
+function useCairoTime() {
+  const [time, setTime] = useState<string>("")
+
+  useEffect(() => {
+    const update = () => {
+      try {
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Africa/Cairo",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+        setTime(formatter.format(new Date()))
+      } catch {
+        setTime("")
+      }
+    }
+    update()
+    const timer = setInterval(update, 30000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return time
+}
+
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [activeSection, setActiveSection] = useState<string>("hero")
+  const [copiedEmail, setCopiedEmail] = useState(false)
+
+  const cairoTime = useCairoTime()
 
   useEffect(() => {
     setMounted(true)
 
     const handleScroll = () => {
-      const sections = ["work", "projects", "facts", "contact"]
-      const scrollPosition = window.scrollY + 200
+      const sections = ["featured", "projects", "packages", "skills", "about", "contact"]
+      const scrollPosition = window.scrollY + 220
 
       for (const section of sections) {
         const element = document.getElementById(section)
@@ -94,125 +136,169 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const featuredProjects = useMemo(() => PROJECTS.filter((p) => p.featured), [])
-  const pastProjects = useMemo(() => PROJECTS.filter((p) => !p.featured), [])
+  // Copy email helper
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(portfolioData.personalInfo.email)
+    setCopiedEmail(true)
+    setTimeout(() => setCopiedEmail(false), 2400)
+  }
 
-  // Filter categories for the archive
-  const filteredArchive = useMemo(() => {
-    return pastProjects.filter((project) => {
+  // All projects from lib/portfolio-data.ts
+  const allProjects = portfolioData.projects
+  const featuredProjects = useMemo(() => allProjects.filter((p) => p.featured), [allProjects])
+  const packages = portfolioData.packages
+
+  // Filtered projects according to category pill & search query
+  const filteredProjects = useMemo(() => {
+    return allProjects.filter((project) => {
+      const query = searchQuery.trim().toLowerCase()
       const matchesSearch =
-        searchQuery.trim() === "" ||
-        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        query === "" ||
+        project.title.toLowerCase().includes(query) ||
+        project.tagline.toLowerCase().includes(query) ||
+        project.plainDescription.toLowerCase().includes(query) ||
+        project.technicalDescription.toLowerCase().includes(query) ||
+        project.technologies.some((tech) => tech.toLowerCase().includes(query)) ||
+        project.category.toLowerCase().includes(query)
 
       if (!matchesSearch) return false
 
       if (selectedCategory === "all") return true
-      if (selectedCategory === "web") {
-        return project.tags.some((t) =>
-          ["Django", "React", "Next.js", "Web App", "Rental Management", "Flask"].includes(t)
-        )
+      if (selectedCategory === "featured") return project.featured
+      if (selectedCategory === "web-mobile") {
+        return project.category === "Web App" || project.category === "Web & Mobile App"
+      }
+      if (selectedCategory === "business") {
+        return project.category === "Business Tool"
+      }
+      if (selectedCategory === "quantum") {
+        return project.category === "Quantum / Research"
       }
       if (selectedCategory === "ai") {
+        return project.category === "AI / ML" || project.category === "Quantum / Research"
+      }
+      if (selectedCategory === "pwa-games") {
         return (
-          project.tags.some((t) =>
-            ["AI", "Gemini AI", "Minimax AI", "Learning"].includes(t)
-          ) || project.title.toLowerCase().includes("ai")
-        )
-      }
-      if (selectedCategory === "pwa") {
-        return project.tags.some((t) => ["PWA", "Electron"].includes(t))
-      }
-      if (selectedCategory === "packages") {
-        return project.tags.some((t) =>
-          ["Python", "REST API", "File Upload", "Email", "Currency", "Exchange Rates"].includes(t)
+          project.category === "PWA" ||
+          project.category === "Game" ||
+          project.category === "Early Work"
         )
       }
       return true
     })
-  }, [pastProjects, selectedCategory, searchQuery])
+  }, [allProjects, selectedCategory, searchQuery])
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070B14] text-[#09111E] dark:text-[#F8FAFC] font-sans selection:bg-blue-500/20 selection:text-blue-900 dark:selection:text-blue-200 transition-colors duration-300 relative overflow-x-hidden">
-      {/* Background Subtle Grid */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30 dark:opacity-15 mask-fade-edges" />
-      </div>
+      {/* 3D Antigravity Floating Background with Ambient Orbs */}
+      <FloatingBackground />
 
       {/* Sticky Glass Top Navigation Bar */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/85 dark:bg-[#070B14]/85 backdrop-blur-xl transition-all duration-200">
+      <header className="sticky top-0 z-50 w-full border-b border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/80 dark:bg-[#070B14]/80 backdrop-blur-2xl transition-all duration-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <a
             href="#"
             className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1"
           >
-            <div className="w-8 h-8 rounded-full bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 dark:border-rose-400/40 flex items-center justify-center text-rose-600 dark:text-rose-400 font-bold text-sm shadow-sm group-hover:scale-105 transition-transform shrink-0">
-              KB
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-md shadow-blue-500/15 group-hover:scale-105 transition-transform shrink-0 border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-white/5">
+              <Image
+                src="/KBLogo.png"
+                alt="Karim Bassem Logo"
+                fill
+                sizes="36px"
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-sm font-heading text-slate-900 dark:text-slate-100 tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                Karim Bassem
+                {portfolioData.personalInfo.name}
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
-                Software Developer
+                {portfolioData.personalInfo.role} • Imhotep Tech
               </span>
             </div>
           </a>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Main Navigation">
             <a
-              href="#work"
+              href="#featured"
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
-                activeSection === "work"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-rose-600 dark:border-rose-500 font-bold"
-                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-blue-50/60 dark:hover:bg-white/5"
+                activeSection === "featured"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
-              Work
+              Featured
             </a>
             <a
               href="#projects"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all flex items-center gap-1.5 ${
                 activeSection === "projects"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-rose-600 dark:border-rose-500 font-bold"
-                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-blue-50/60 dark:hover:bg-white/5"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
-              All Projects
+              <span>All Projects</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-slate-300">
+                {allProjects.length}
+              </span>
             </a>
             <a
-              href="#facts"
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
-                activeSection === "facts"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-rose-600 dark:border-rose-500 font-bold"
-                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-blue-50/60 dark:hover:bg-white/5"
+              href="#packages"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all flex items-center gap-1.5 ${
+                activeSection === "packages"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
-              Facts
+              <span>Libraries</span>
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-slate-300">
+                {packages.length}
+              </span>
+            </a>
+            <a
+              href="#skills"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "skills"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+              }`}
+            >
+              Stack & Studio
+            </a>
+            <a
+              href="#about"
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
+                activeSection === "about"
+                  ? "text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+              }`}
+            >
+              Education
             </a>
             <a
               href="#contact"
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider font-heading transition-all ${
                 activeSection === "contact"
-                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-rose-600 dark:border-rose-500 font-bold"
-                  : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white hover:bg-blue-50/60 dark:hover:bg-white/5"
+                  ? "text-rose-600 dark:text-rose-400 bg-rose-500/10 dark:bg-white/5 font-bold"
+                  : "text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-white/5"
               }`}
             >
               Contact
             </a>
-            <div className="ml-1 pl-2 border-l border-slate-300/60 dark:border-white/10">
+            <div className="ml-2 pl-2 border-l border-slate-300/60 dark:border-white/10">
               <ThemeToggle />
             </div>
           </nav>
 
-          {/* Mobile Navigation Controls */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Navigation Toggle */}
+          <div className="flex lg:hidden items-center gap-2">
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -222,11 +308,11 @@ export default function Home() {
 
         {/* Mobile Dropdown Glass Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/95 dark:bg-[#070B14]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-xl animate-in slide-in-from-top-2 duration-200">
+          <nav className="lg:hidden border-t border-[#E2E8F0] dark:border-white/10 bg-[#F8FAFC]/95 dark:bg-[#070B14]/95 backdrop-blur-2xl px-4 py-3 space-y-1 shadow-2xl animate-in slide-in-from-top-2 duration-200">
             <a
-              href="#work"
+              href="#featured"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between min-h-[44px]"
             >
               <span>Featured Work</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
@@ -234,595 +320,599 @@ export default function Home() {
             <a
               href="#projects"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between min-h-[44px]"
             >
-              <span>All Projects & Packages</span>
+              <span>All Projects ({allProjects.length})</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
             </a>
             <a
-              href="#facts"
+              href="#packages"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between min-h-[44px]"
             >
-              <span>Quick Facts & Tech Stack</span>
+              <span>Libraries & APIs ({packages.length})</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+            <a
+              href="#skills"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between min-h-[44px]"
+            >
+              <span>Studio & Tech Stack</span>
+              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+            </a>
+            <a
+              href="#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between min-h-[44px]"
+            >
+              <span>Education & Quick Facts</span>
               <ArrowUpRight className="h-4 w-4 text-slate-400" />
             </a>
             <a
               href="#contact"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-4 py-3 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-all flex items-center justify-between"
+              className="px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-all flex items-center justify-between min-h-[44px]"
             >
-              <span>Contact</span>
-              <ArrowUpRight className="h-4 w-4 text-slate-400" />
+              <span>Contact Karim</span>
+              <ArrowUpRight className="h-4 w-4 text-rose-500" />
             </a>
           </nav>
         )}
       </header>
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-8 pb-20 space-y-20">
-        {/* HERO SECTION — BENTO GRID (Stitch Screen 4) */}
+      <main className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 pt-6 sm:pt-10 pb-24 space-y-24">
+        {/* HERO SECTION — ANTIGRAVITY BENTO GRID */}
         <section className="pt-2 sm:pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             {/* Main Bio Bento Card */}
-            <div className="lg:col-span-8 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm relative overflow-hidden group">
+            <TiltCard
+              maxTilt={5}
+              scaleOnHover={1.01}
+              className="lg:col-span-8 antigravity-glass rounded-3xl p-6 sm:p-10 flex flex-col justify-between shadow-antigravity relative overflow-hidden group border border-slate-200/80 dark:border-white/10"
+            >
               <div className="space-y-6">
-                {/* Status Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-xs font-semibold text-emerald-700 dark:text-emerald-300 shadow-xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  Available for contracts & software roles
-                </div>
+                {/* Cairo Time & Location */}
+                {cairoTime && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-xs font-mono text-slate-600 dark:text-slate-400">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    <Clock className="w-3.5 h-3.5 text-blue-500" />
+                    <span>{cairoTime} • Cairo, Egypt</span>
+                  </div>
+                )}
 
+                {/* Main Headline with 3D Word Rotator */}
                 <div className="space-y-4">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-heading tracking-tight leading-[1.15] text-slate-900 dark:text-white">
-                    Hi, I'm Karim. <br />
-                    <span className="text-blue-600 dark:text-blue-400">
-                      I build software{" "}
+                  <h1 className="text-3xl sm:text-5xl lg:text-[3.4rem] font-bold font-heading tracking-tight leading-[1.12] text-slate-900 dark:text-white">
+                    Hi, I'm {portfolioData.personalInfo.firstName}. <br />
+                    <span className="text-slate-900 dark:text-white">I build </span>
+                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-300 bg-clip-text text-transparent">
+                      software{" "}
                     </span>
-                    <span className="text-rose-600 dark:text-rose-500">
+                    <span className="bg-gradient-to-r from-rose-600 to-amber-600 dark:from-rose-400 dark:to-amber-300 bg-clip-text text-transparent">
                       people actually use.
                     </span>
                   </h1>
-                  <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-                    Software Developer, Founder of{" "}
+
+                  {/* 3D Animated Role Rotator */}
+                  <div className="text-lg sm:text-2xl font-semibold font-heading text-slate-700 dark:text-slate-300 flex items-center gap-2 pt-1">
+                    <span className="text-slate-400 dark:text-slate-500">I am a</span>
+                    <RoleRotator roles={portfolioData.roles} intervalMs={3000} />
+                  </div>
+
+                  <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed pt-2">
+                    {portfolioData.personalInfo.bio}{" "}
                     <a
-                      href="https://www.imhotep-tech.com/"
+                      href={portfolioData.imhotepTech.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:text-rose-600 dark:hover:text-rose-400 hover:underline underline-offset-4 font-semibold transition-colors inline-flex items-center gap-0.5"
+                      className="text-blue-600 dark:text-blue-400 hover:text-rose-600 dark:hover:text-rose-400 font-semibold underline underline-offset-4 transition-colors inline-flex items-center gap-0.5"
                     >
-                      Imhotep Tech
+                      {portfolioData.imhotepTech.name}
                       <ArrowUpRight className="h-4 w-4" />
                     </a>
-                    , and CS Student.
                   </p>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3.5 mt-8 pt-4">
+              {/* Action Buttons & Socials */}
+              <div className="flex flex-wrap items-center gap-3.5 mt-8 pt-6 border-t border-slate-200/70 dark:border-white/10">
                 <a
-                  href="#work"
-                  className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px]"
+                  href="#projects"
+                  className="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <Terminal className="h-4 w-4" />
-                  View Featured Work
+                  Explore All {allProjects.length} Projects
                 </a>
-                <a
-                  href="#contact"
-                  className="px-6 py-3 rounded-xl bg-transparent border border-slate-300 dark:border-white/15 text-slate-800 dark:text-slate-200 font-semibold text-xs uppercase tracking-wider font-heading hover:bg-rose-500/10 hover:border-rose-500/40 hover:text-rose-600 dark:hover:text-rose-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out flex items-center justify-center gap-2 min-h-[44px]"
-                >
-                  <Mail className="h-4 w-4" />
-                  Contact Me
-                </a>
-              </div>
-            </div>
 
-            {/* Profile & Quick Stats Bento Column */}
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="px-5 py-3.5 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-slate-200 font-semibold text-xs uppercase tracking-wider font-heading hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 min-h-[44px]"
+                  aria-label="Copy Karim's email address"
+                >
+                  {copiedEmail ? (
+                    <>
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      <span className="text-emerald-600 dark:text-emerald-400">Copied Email!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 text-slate-500" />
+                      <span>Copy Email</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Social Icon Pills */}
+                <div className="flex items-center gap-2 ml-auto">
+                  {portfolioData.socialLinks.map((social) => (
+                    <a
+                      key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-11 h-11 rounded-xl bg-slate-100/90 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-400/50 hover:scale-105 active:scale-95 transition-all flex items-center justify-center min-h-[44px] min-w-[44px]"
+                      aria-label={`${social.name} Profile`}
+                    >
+                      {social.name === "GitHub" && <Github className="h-4.5 w-4.5" />}
+                      {social.name === "LinkedIn" && <Linkedin className="h-4.5 w-4.5" />}
+                      {social.name === "Twitter" && <Twitter className="h-4.5 w-4.5" />}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </TiltCard>
+
+            {/* Profile Photo & Spatial Stats Column */}
             <div className="lg:col-span-4 flex flex-col gap-6">
-              {/* Profile Photo Card */}
-              <div className="bento-card rounded-2xl overflow-hidden shadow-sm aspect-square relative group">
+              {/* Profile Card with 3D Depth */}
+              <TiltCard
+                maxTilt={8}
+                scaleOnHover={1.02}
+                className="antigravity-glass rounded-3xl overflow-hidden shadow-antigravity aspect-square relative group border border-slate-200/80 dark:border-white/10"
+              >
                 <Image
                   src="/kbassem.jpg"
-                  alt="Karim Bassem"
+                  alt="Karim Bassem Joseph"
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, 400px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
-              </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
+
+                {/* Bottom Photo Overlay */}
+                <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold font-heading tracking-wide">
+                      {portfolioData.personalInfo.name}
+                    </p>
+                    <p className="text-[11px] text-slate-300 font-mono">
+                      Founder @ Imhotep Tech
+                    </p>
+                  </div>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+              </TiltCard>
 
               {/* Quick Stats Grid */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bento-card rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                  <div className="w-8 h-8 rounded-full bg-rose-500/10 dark:bg-rose-400/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
-                    <GraduationCap className="h-4.5 w-4.5" />
+                <TiltCard
+                  maxTilt={6}
+                  scaleOnHover={1.03}
+                  className="antigravity-glass rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center border border-slate-200/80 dark:border-white/10"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2">
+                    <GraduationCap className="h-5 w-5" />
                   </div>
-                  <span className="text-2xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
+                  <span className="text-2xl sm:text-3xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
                     3.96
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                    GPA
+                    GPA (Honors)
                   </span>
-                </div>
+                </TiltCard>
 
-                <div className="bento-card rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center text-center group hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
-                    <Layers className="h-4.5 w-4.5" />
+                <TiltCard
+                  maxTilt={6}
+                  scaleOnHover={1.03}
+                  className="antigravity-glass rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center border border-slate-200/80 dark:border-white/10"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
+                    <Layers className="h-5 w-5" />
                   </div>
-                  <span className="text-2xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
-                    {PROJECTS.length}+
+                  <span className="text-2xl sm:text-3xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
+                    {allProjects.length}+
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                    Projects
+                    Shipped Apps
                   </span>
-                </div>
+                </TiltCard>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FEATURED WORK & SYSTEMS SECTION (`#work`) */}
-        <section id="work" className="space-y-6 scroll-mt-24">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-rose-600 dark:text-rose-400">
-              <Sparkles className="h-3.5 w-3.5" />
-              Featured Portfolio
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
-              Featured Work & Systems
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-              Hand-crafted web, mobile, and quantum tools built for real impact.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProjects.map((project) => (
-              <div
-                key={project.title}
-                className="bento-card rounded-2xl p-6 flex flex-col justify-between group shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border border-slate-200/80 dark:border-white/10"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {project.title}
-                    </h3>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-heading uppercase tracking-wider bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40 shrink-0">
-                      Featured
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {project.description}
-                  </p>
+        {/* METRICS BAND */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {portfolioData.metrics.map((metric) => (
+            <TiltCard
+              key={metric.label}
+              maxTilt={5}
+              scaleOnHover={1.02}
+              className="antigravity-glass rounded-2xl p-6 flex items-center gap-4 border border-slate-200/80 dark:border-white/10 shadow-sm"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 border border-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                <Rocket className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-3xl font-bold font-heading text-slate-900 dark:text-white tracking-tight">
+                  {metric.value}
+                  {metric.suffix}
                 </div>
-
-                <div className="space-y-4 mt-6 pt-4 border-t border-slate-200/60 dark:border-white/5">
-                  {/* Tech Tags */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.tags.map((tag) => (
-                      <span key={tag} className="tech-badge">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Action Links */}
-                  <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center gap-1.5 min-h-[38px]"
-                        aria-label={`Source code for ${project.title}`}
-                      >
-                        <Github className="h-3.5 w-3.5" />
-                        Code
-                      </a>
-                    )}
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/40 text-xs font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all flex items-center gap-1.5 min-h-[38px]"
-                        aria-label={`Live demo for ${project.title}`}
-                      >
-                        <ArrowUpRight className="h-3.5 w-3.5" />
-                        Live Demo
-                      </a>
-                    )}
-                    {project.playStoreUrl && (
-                      <a
-                        href={project.playStoreUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-1.5 min-h-[38px]"
-                        aria-label={`Play Store app for ${project.title}`}
-                      >
-                        <Smartphone className="h-3.5 w-3.5" />
-                        Play Store
-                      </a>
-                    )}
-                    {!project.githubUrl && !project.liveUrl && !project.playStoreUrl && (
-                      <span className="text-xs text-slate-400 italic py-1">Internal Tool</span>
-                    )}
-                  </div>
+                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {metric.label}
                 </div>
               </div>
+            </TiltCard>
+          ))}
+        </section>
+
+        {/* FEATURED WORK & FLAGSHIP SYSTEMS (`#featured`) */}
+        <section id="featured" className="space-y-6 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-rose-600 dark:text-rose-400">
+                <Sparkles className="h-3.5 w-3.5" />
+                Flagship Systems
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+                Featured Work & Real-World Deployments
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-2xl">
+                High-scale production systems in active use by businesses and thousands of customers.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {featuredProjects.map((project) => (
+              <ProjectCard key={project.title} project={project} priorityFeatured={true} />
             ))}
           </div>
         </section>
 
-        {/* ALL PROJECTS & LIBRARIES / ARCHIVE SECTION (`#projects`, Stitch Screen 2) */}
+        {/* ALL PROJECTS SECTION (`#projects`) — SHOWING 100% OF PROJECTS IN portfolio-data.ts */}
         <section id="projects" className="space-y-6 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-6">
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-blue-600 dark:text-blue-400">
                 <Terminal className="h-3.5 w-3.5" />
-                Open Source & Packages
+                Comprehensive Portfolio
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
-                More Projects & Libraries
+                All Projects ({allProjects.length})
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                100% complete archive of apps, Python libraries, and tools built across various stacks.
+                Every project from portfolio data with both plain-English business value and deep technical architecture specs.
               </p>
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64 shrink-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            {/* Live Search Input */}
+            <div className="relative w-full sm:w-72 shrink-0">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search archive..."
+                placeholder="Search by tech, name, or domain..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all min-h-[44px]"
               />
             </div>
           </div>
 
-          {/* Interactive Category Filter Pills */}
-          <div className="flex flex-wrap gap-2 items-center">
+          {/* Category Filter Pills */}
+          <div className="flex flex-wrap gap-2 items-center" role="tablist">
             <button
               onClick={() => setSelectedCategory("all")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
                 selectedCategory === "all"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
               }`}
             >
-              All ({pastProjects.length})
+              All ({allProjects.length})
             </button>
             <button
-              onClick={() => setSelectedCategory("web")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
-                selectedCategory === "web"
+              onClick={() => setSelectedCategory("featured")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
+                selectedCategory === "featured"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
               }`}
             >
-              Web Apps
+              Featured ({featuredProjects.length})
+            </button>
+            <button
+              onClick={() => setSelectedCategory("business")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
+                selectedCategory === "business"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
+              }`}
+            >
+              Business Tools
+            </button>
+            <button
+              onClick={() => setSelectedCategory("web-mobile")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
+                selectedCategory === "web-mobile"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
+              }`}
+            >
+              Web & Mobile Apps
+            </button>
+            <button
+              onClick={() => setSelectedCategory("quantum")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
+                selectedCategory === "quantum"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
+              }`}
+            >
+              Quantum & Research
             </button>
             <button
               onClick={() => setSelectedCategory("ai")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
                 selectedCategory === "ai"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
               }`}
             >
               AI / ML
             </button>
             <button
-              onClick={() => setSelectedCategory("pwa")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
-                selectedCategory === "pwa"
+              onClick={() => setSelectedCategory("pwa-games")}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold font-heading transition-all min-h-[40px] ${
+                selectedCategory === "pwa-games"
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300"
+                  : "bg-slate-100/90 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-white/5"
               }`}
             >
-              PWAs & Tools
-            </button>
-            <button
-              onClick={() => setSelectedCategory("packages")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-heading transition-all ${
-                selectedCategory === "packages"
-                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-300"
-              }`}
-            >
-              APIs & Libraries
+              PWAs, Games & Early Work
             </button>
           </div>
 
-          {/* Archive Project Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredArchive.map((project) => {
-              const primaryLink = project.liveUrl || project.githubUrl
-
-              return (
-                <div
-                  key={project.title}
-                  className="bento-card rounded-2xl p-5 flex flex-col justify-between group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border border-slate-200/80 dark:border-white/10"
-                >
-                  <div className="space-y-2.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {project.title}
-                      </h3>
-                      {primaryLink && (
-                        <a
-                          href={primaryLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all shrink-0"
-                          aria-label={`Open link for ${project.title}`}
-                        >
-                          <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed flex-grow">
-                      {project.description}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3 mt-5 pt-3.5 border-t border-slate-200/60 dark:border-white/5">
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => (
-                        <span key={tag} className="tech-badge text-[11px] py-0.5 px-2">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Links */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400 pt-1">
-                      {project.githubUrl && (
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 hover:text-blue-600 dark:hover:text-white transition-colors"
-                        >
-                          <Github className="h-3.5 w-3.5" />
-                          GitHub Repo
-                        </a>
-                      )}
-                      {project.liveUrl && (
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          {project.liveUrl.includes("pypi.org")
-                            ? "PyPI Package"
-                            : "Live Deployment"}
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+          {/* Projects Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
+              <ProjectCard key={project.title} project={project} />
+            ))}
           </div>
 
-          {filteredArchive.length === 0 && (
-            <div className="text-center py-12 bento-card rounded-2xl">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                No projects matched your search criteria.
+          {filteredProjects.length === 0 && (
+            <div className="text-center py-16 antigravity-glass rounded-2xl border border-slate-200/80 dark:border-white/10">
+              <p className="text-base font-medium text-slate-600 dark:text-slate-300">
+                No projects matched "{searchQuery}".
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedCategory("all")
+                }}
+                className="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline min-h-[44px] px-3 py-2"
+              >
+                Reset filters & search
+              </button>
             </div>
           )}
         </section>
 
-        {/* QUICK FACTS & TECH STACK SECTION (`#facts`, Stitch Screen 3) */}
-        <section id="facts" className="space-y-6 scroll-mt-24">
+        {/* PUBLISHED LIBRARIES & REUSABLE PACKAGES SECTION (`#packages`) */}
+        <section id="packages" className="space-y-6 scroll-mt-24">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-rose-600 dark:text-rose-400">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Background & Skills
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              <PackageIcon className="h-3.5 w-3.5" />
+              Published Packages
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
-              Quick Facts & Tech Stack
+              Libraries & APIs ({packages.length})
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-              Academic excellence, studio leadership, and end-to-end tooling.
+              Reusable Python libraries published on PyPI and free developer APIs built for other engineers to import and use.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {packages.map((pkg) => (
+              <PackageCard key={pkg.title} pkg={pkg} />
+            ))}
+          </div>
+        </section>
+
+        {/* STUDIO SPOTLIGHT & ENGINEERING MATRIX (`#skills`) */}
+        <section id="skills" className="space-y-8 scroll-mt-24">
+          <StudioCard />
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-rose-600 dark:text-rose-400">
+                <Code className="h-3.5 w-3.5" />
+                Technical Capabilities
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+                Engineering Stack & Foundations
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Grouped by architectural capability — from pixel-level interfaces to database queries and testing.
+              </p>
+            </div>
+
+            <SkillsMatrix />
+          </div>
+        </section>
+
+        {/* EDUCATION & QUICK FACTS (`#about`) */}
+        <section id="about" className="space-y-6 scroll-mt-24">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold font-heading uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Academic Background
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+              Education & Honors
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+              Top academic performance combined with hands-on software development.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            {/* Education Card (4 cols) */}
-            <div className="md:col-span-4 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+            {/* Degree Card */}
+            <TiltCard
+              maxTilt={5}
+              scaleOnHover={1.01}
+              className="md:col-span-7 antigravity-glass rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-slate-200/80 dark:border-white/10"
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:bg-rose-400/10 dark:text-rose-400 flex items-center justify-center mb-6">
                   <GraduationCap className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white mb-2">
-                  Education
+                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white mb-1.5">
+                  {portfolioData.education.program}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                  4th-Year Computer Science Student at{" "}
-                  <strong className="text-slate-900 dark:text-white">Nile University</strong>.
+                <p className="text-sm text-slate-600 dark:text-slate-300 font-medium mb-6">
+                  {portfolioData.education.school} • {portfolioData.education.location}
                 </p>
               </div>
 
-              <div className="space-y-2.5 bg-slate-100/70 dark:bg-slate-900/70 p-4 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
-                  <span>
-                    Cumulative GPA:{" "}
-                    <strong className="text-rose-600 dark:text-rose-400 font-bold">
-                      3.96 / 4.00
-                    </strong>
+              <div className="space-y-3 bg-slate-100/80 dark:bg-slate-900/80 p-5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
+                <div className="flex items-center justify-between">
+                  <span>Cumulative GPA:</span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400 text-sm">
+                    3.96 / 4.00
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600 dark:bg-rose-400" />
-                  <span>
-                    Presidential Honors on 2 terms with{" "}
-                    <strong className="text-rose-600 dark:text-rose-400 font-bold">4.0 GPA</strong>
+                <div className="flex items-center justify-between">
+                  <span>Presidential Honors:</span>
+                  <span className="font-bold text-rose-600 dark:text-rose-400 text-sm">
+                    2 Terms (4.0 GPA)
                   </span>
                 </div>
               </div>
-            </div>
+            </TiltCard>
 
-            {/* Studio & Engineering Card (8 cols) */}
-            <div className="md:col-span-8 bento-card rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-sm group hover:scale-[1.01] active:scale-[0.99] transition-all duration-200">
+            {/* Philosophy & Delivery Card */}
+            <TiltCard
+              maxTilt={5}
+              scaleOnHover={1.01}
+              className="md:col-span-5 antigravity-glass rounded-2xl p-6 sm:p-8 flex flex-col justify-between border border-slate-200/80 dark:border-white/10"
+            >
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 flex items-center justify-center mb-6">
-                  <Rocket className="h-6 w-6" />
+                  <CheckCircle2 className="h-6 w-6" />
                 </div>
                 <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white mb-2">
-                  Studio & Engineering
+                  Engineering Philosophy
                 </h3>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6 max-w-2xl">
-                  Founder & Lead Developer at{" "}
-                  <a
-                    href="https://www.imhotep-tech.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-rose-600 dark:hover:text-rose-400 hover:underline font-bold transition-colors"
-                  >
-                    Imhotep Tech
-                  </a>
-                  . Building web platforms, cross-platform mobile apps, and open-source developer tools.
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  "I build things people actually use." Whether it's replacing paper cards with digital PWAs or architecting domain-driven APIs, I believe software only succeeds when users love using it.
                 </p>
               </div>
 
-              <div className="bg-slate-100/70 dark:bg-slate-900/70 p-5 rounded-xl border-l-4 border-blue-600 dark:border-blue-500 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-                <strong className="text-slate-900 dark:text-white font-bold">Focus:</strong> High
-                performance, clean domain architecture, accessible design, and real-world deployment.
+              <div className="mt-6 pt-4 border-t border-slate-200/60 dark:border-white/5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <span>Based in {portfolioData.personalInfo.location}</span>
               </div>
-            </div>
-
-            {/* Full Tech Stack Card (12 cols) */}
-            <div className="md:col-span-12 bento-card rounded-2xl p-6 sm:p-8 shadow-sm group hover:scale-[1.005] transition-all duration-200">
-              <div className="flex items-center gap-3 mb-6 border-b border-slate-200/80 dark:border-white/10 pb-4">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 flex items-center justify-center">
-                  <Code className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-bold font-heading text-slate-900 dark:text-white">
-                  Full Tech Stack
-                </h3>
-              </div>
-
-              <div className="flex flex-wrap gap-2.5">
-                {[
-                  "React Native",
-                  "Next.js",
-                  "React",
-                  "TypeScript",
-                  "Tailwind CSS",
-                  "PWA",
-                  "Django",
-                  "Django REST",
-                  "FastAPI",
-                  "Flask",
-                  "Python",
-                  "Qiskit",
-                  "PostgreSQL",
-                  "SQLite",
-                  "Docker",
-                  "Tailscale",
-                  "Git",
-                  "Playwright",
-                ].map((tech) => (
-                  <span
-                    key={tech}
-                    className="tech-badge text-xs px-3.5 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-300 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
+            </TiltCard>
           </div>
         </section>
 
         {/* CTA & CONTACT SECTION (`#contact`) */}
         <section id="contact" className="scroll-mt-24">
-          <div className="bento-card rounded-3xl p-8 sm:p-12 shadow-sm relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-8 border border-slate-200/80 dark:border-white/10">
-            <div className="space-y-2 max-w-xl text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
-                Let's build something extraordinary.
+          <TiltCard
+            maxTilt={4}
+            scaleOnHover={1.01}
+            className="antigravity-glass rounded-3xl p-8 sm:p-12 shadow-antigravity relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 border border-slate-200/80 dark:border-white/10"
+          >
+            <div className="space-y-3 max-w-xl text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold font-heading uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-rose-500" />
+                Get in Touch
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-bold font-heading tracking-tight text-slate-900 dark:text-white">
+                Have a project or problem to solve?
               </h2>
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                Available for contract engineering roles, technical advisory, and high-impact software projects.
+                Whether you need a custom web app, an API integration, or an automation pipeline, feel free to reach out.
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3.5 shrink-0">
               <a
-                href="https://github.com/kbassem10"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-xs"
-                aria-label="GitHub Profile"
-              >
-                <Github className="h-5 w-5" />
-              </a>
-              <a
-                href="https://www.linkedin.com/in/karimbassem"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-[1.05] active:scale-[0.95] transition-all duration-200 flex items-center justify-center shadow-xs"
-                aria-label="LinkedIn Profile"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="mailto:karimbassemj@gmail.com"
-                className="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-rose-500/25 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 flex items-center gap-2 min-h-[44px]"
-                aria-label="Email Karim Bassem"
+                href={`mailto:${portfolioData.personalInfo.email}`}
+                className="px-6 py-3.5 rounded-xl bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-500 text-white font-semibold text-xs uppercase tracking-wider font-heading shadow-md shadow-rose-500/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 min-h-[44px]"
+                aria-label={`Send an email to ${portfolioData.personalInfo.email}`}
               >
                 <Mail className="h-4 w-4" />
-                Get in Touch
+                Email Karim
               </a>
-            </div>
-          </div>
 
-          <div className="mt-12 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <div className="flex items-center justify-center gap-6 mb-4">
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="px-5 py-3.5 rounded-xl bg-slate-100/90 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-800 dark:text-slate-200 font-semibold text-xs uppercase tracking-wider font-heading hover:bg-slate-200 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 min-h-[44px]"
+                aria-label="Copy email address"
+              >
+                {copiedEmail ? (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-500" />
+                    <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 text-slate-500" />
+                    <span>Copy Address</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </TiltCard>
+
+          {/* Footer Info */}
+          <footer className="mt-16 text-center text-xs text-slate-500 dark:text-slate-400 font-medium space-y-3">
+            <div className="flex items-center justify-center gap-6">
+              {portfolioData.socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold"
+                >
+                  {social.name}
+                </a>
+              ))}
               <a
-                href="https://github.com/kbassem10"
+                href={portfolioData.imhotepTech.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-semibold"
               >
-                GitHub
-              </a>
-              <a
-                href="https://www.linkedin.com/in/karimbassem"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-semibold"
-              >
-                LinkedIn
-              </a>
-              <a
-                href="https://x.com/kbassem10"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors font-semibold"
-              >
-                Twitter
+                Imhotep Tech
               </a>
             </div>
-            <p>© {new Date().getFullYear()} Karim Bassem Joseph.</p>
-          </div>
+            <p>
+              © {new Date().getFullYear()} {portfolioData.personalInfo.name}. Designed with spatial depth & weightlessness.
+            </p>
+          </footer>
         </section>
       </main>
     </div>
   )
 }
-

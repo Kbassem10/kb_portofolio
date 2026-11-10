@@ -2,6 +2,7 @@ export type ProjectCategory =
   | "Web App"
   | "Web & Mobile App"
   | "AI / ML"
+  | "Quantum / Research"
   | "Business Tool"
   | "PWA"
   | "Game"
@@ -40,6 +41,51 @@ export type Package = {
  */
 const projects: Project[] = [
   {
+    title: "6G Quantum Network Optimization Platform",
+    tagline:
+      "Decoupled React & FastAPI architecture executing quantum algorithms for 6G network optimization.",
+    plainDescription:
+      "Built in collaboration with Orange Labs (France), this tool allows telecommunications researchers and engineers to solve complex 6G Radio Access Network (RAN) optimization challenges without needing deep quantum physics expertise. It abstracts complicated formulation into an intuitive interface.",
+    technicalDescription:
+      "A modular, decoupled architecture pairing a React frontend (representing RAN optimization problem spaces) with a FastAPI backend. Problem formulations and quantum algorithms communicate through a Quadratic Unconstrained Binary Optimization (QUBO) mathematical bridge, allowing arbitrary problem frontends and quantum backends (QAOA, VQE, Simulated Annealing via Qiskit) to be attached, swapped, and benchmarked independently.",
+    technologies: [
+      "React",
+      "FastAPI",
+      "Python",
+      "Qiskit",
+      "QUBO",
+      "QAOA",
+      "VQE",
+      "Quantum Computing",
+      "Docker",
+    ],
+    category: "Quantum / Research",
+    impact: "Built for Orange Labs (France) for 6G RAN research",
+    featured: true,
+  },
+  {
+    title: "Enterprise Odoo ERP & Custom Modules",
+    tagline:
+      "Custom Odoo addons, automated business workflows, and modern reactive UIs with Odoo OWL.",
+    plainDescription:
+      "Developed custom ERP modules and automated operational workflows during an engineering internship, helping companies transition their daily operations, inventory, and billing onto streamlined digital systems.",
+    technicalDescription:
+      "Engineered custom Odoo addons using Python and PostgreSQL with modern reactive frontend components built using Odoo OWL (Open Wood Library). Managed development, staging, and deployment pipelines on Odoo.sh, creating tailored business models, automated reports, and role-based access workflows for live production environments.",
+    technologies: [
+      "Python",
+      "Odoo",
+      "Odoo OWL",
+      "Odoo.sh",
+      "PostgreSQL",
+      "ERP Architecture",
+      "XML",
+      "JavaScript",
+    ],
+    category: "Business Tool",
+    impact: "Streamlined live daily workflows for real companies",
+    featured: true,
+  },
+  {
     title: "Loyalty Program Platform",
     tagline:
       "Turned a car-services chain's paper loyalty cards into a bilingual app used by 650+ customers.",
@@ -75,6 +121,27 @@ const projects: Project[] = [
     githubUrl: "https://github.com/Imhotep-Tech/imhotep_finance",
     playStoreUrl: "https://play.google.com/store/apps/details?id=com.imhoteptech.imhotep_finance",
     featured: true,
+  },
+  {
+    title: "Internal RPA & Workflow Automation",
+    tagline:
+      "AI-accelerated Python automations connecting Google Sheets, legacy .NET 4 ERP, and API-less web platforms.",
+    plainDescription:
+      "Built targeted Python automations using AI-assisted engineering to eliminate repetitive human data entry. Streamlined operational workflows by syncing Google Sheets directly with a legacy .NET 4 ERP system and utilizing Playwright to automate critical tasks across internal platforms that lacked available API endpoints.",
+    technicalDescription:
+      "Engineered Python RPA (Robotic Process Automation) scripts leveraging Playwright for headless browser automation across API-less web portals. Integrated the Google Sheets API with custom automation routines to feed validated records directly into a legacy .NET 4 ERP system, eliminating data entry discrepancies, duplicate entries, and manual errors.",
+    technologies: [
+      "Python",
+      "Playwright",
+      "Google Sheets API",
+      ".NET 4 ERP",
+      "RPA Automation",
+      "AI-Assisted Coding",
+      "Headless Browsing",
+      "Workflow Automation",
+    ],
+    category: "Business Tool",
+    impact: "Eliminated manual entry errors and automated platforms without native APIs",
   },
   {
     title: "Pharaohfolio",
@@ -239,7 +306,7 @@ export const portfolioData = {
       suffix: "+",
     },
     {
-      label: "Open-source packages",
+      label: "Published libraries",
       /** Auto-counts from the packages list below — always in sync. */
       value: packages.length,
       suffix: "",
@@ -292,7 +359,9 @@ export const portfolioData = {
         "Python",
         "Django",
         "Django REST Framework",
+        "FastAPI",
         "Flask",
+        "Odoo & ERP",
         "REST APIs",
         "JWT Auth",
       ],
